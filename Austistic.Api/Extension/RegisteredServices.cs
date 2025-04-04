@@ -5,6 +5,7 @@ using AlpaStock.Infrastructure.Service.Interface;
 using Austistic.Core.Repositories.Implementation;
 using Austistic.Core.Repositories.Interface;
 using Austistic.Infrastructure.Service.Implementation;
+using Austistic.Infrastructure.Service.Interface;
 
 namespace AlpaStock.Api.Extension
 {
@@ -19,6 +20,9 @@ namespace AlpaStock.Api.Extension
             services.AddScoped<IGenerateJwt, GenerateJwt>();
             services.AddScoped<IEmailServices, EmailService>();
             services.AddScoped<ICloudinaryService, CloudinaryService>();
+            services.AddScoped<ISymbolService, SymbolService>();
+            services.AddScoped<IHelper, Helper>();
+            services.AddScoped<IFriendService, FriendService>();
             services.AddAutoMapper(typeof(ProjectProfile));
             services.AddHttpClient();
         }

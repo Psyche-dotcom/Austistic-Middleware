@@ -69,6 +69,8 @@ namespace Austistic.Infrastructure.Service.Implementation
                 mapAccount.Email = signUp.Email;
                 mapAccount.PhoneNumber = signUp.PhoneNumber;
                 mapAccount.UserName = signUp.UserName;
+                mapAccount.Age = signUp.Age;
+                mapAccount.Gender = signUp.Gender;
 
 
                 var createUser = await _accountRepo.SignUpAsync(mapAccount, signUp.Password);
@@ -202,10 +204,10 @@ namespace Austistic.Infrastructure.Service.Implementation
                     LastName = fetchUser.LastName,
                     Country = fetchUser.Country,
                     PhoneNumber = fetchUser.PhoneNumber,
+                    ProfilePicture = fetchUser.ProfilePicture,
                     isSuspended = fetchUser.isSuspended,
                     IsEmailConfirmed = fetchUser.EmailConfirmed,
 
-                    ProfilePicture = fetchUser.ProfilePicture,
                     Created = fetchUser.Created,
 
 

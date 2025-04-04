@@ -14,6 +14,8 @@ namespace Austistic.Core.DTOs.Request.Auth
         public string LastName { get; set; }
         public string Country { get; set; }
 
+        public int Age { get; set; }
+        public string Gender { get; set; }
         [Required]
         [DataType(DataType.PhoneNumber)]
         public string PhoneNumber { get; set; } = string.Empty;

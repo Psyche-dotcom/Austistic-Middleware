@@ -16,6 +16,8 @@ namespace Austistic.Core.DTOs.Response.Auth
         public string Country { get; set; }
         public string UserName { get; set; }
         public bool isSuspended { get; set; }
+        public int Age { get; set; }
+        public string Gender { get; set; }
         public string ActiveSubcriptionName { get; set; }
         public string ProfilePicture { get; set; }
         public bool IsEmailConfirmed { get; set; }

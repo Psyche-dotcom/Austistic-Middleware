@@ -3,6 +3,7 @@ using System;
 using AlpaStock.Core.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Austistic.Core.Migrations
 {
     [DbContext(typeof(AustisticContext))]
-    partial class AustisticContextModelSnapshot : ModelSnapshot
+    [Migration("20250403102004_update category LATEST")]
+    partial class updatecategoryLATEST
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -225,10 +228,6 @@ namespace Austistic.Core.Migrations
 
                     b.Property<DateTime?>("DateUpdated")
                         .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("text");
 
                     b.Property<string>("FileName")
                         .IsRequired()
