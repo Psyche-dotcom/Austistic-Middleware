@@ -77,7 +77,23 @@ namespace Austistic.Api.Controllers
                 return BadRequest(result);
             }
         }
-
+        [HttpPatch("update_role/{email}")]
+        public async Task<IActionResult> UpdateUserRoleAsync(string email, string role)
+        {
+            var result = await _accountService.UpdateUserRole(email, role);
+            if (result.StatusCode == 200)
+            {
+                return Ok(result);
+            }
+            else if (result.StatusCode == 404)
+            {
+                return NotFound(result);
+            }
+            else
+            {
+                return BadRequest(result);
+            }
+        }
 
         [HttpPost("user/forgot_password")]
         public async Task<IActionResult> ForgotPassword(string email)

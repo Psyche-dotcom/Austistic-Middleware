@@ -3,6 +3,7 @@ using System;
 using AlpaStock.Core.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Austistic.Core.Migrations
 {
     [DbContext(typeof(AustisticContext))]
-    partial class AustisticContextModelSnapshot : ModelSnapshot
+    [Migration("20250406142213_update entity newws")]
+    partial class updateentitynewws
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -231,73 +234,6 @@ namespace Austistic.Core.Migrations
                     b.HasIndex("FriendId");
 
                     b.ToTable("Friends");
-                });
-
-            modelBuilder.Entity("Austistic.Core.Entities.SupportMessage", b =>
-                {
-                    b.Property<string>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("Created")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime?>("DateUpdated")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<bool>("IsAdmin")
-                        .HasColumnType("boolean");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("boolean");
-
-                    b.Property<string>("Message")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("SupportTicketId")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("SupportTicketId");
-
-                    b.ToTable("SupportMessage");
-                });
-
-            modelBuilder.Entity("Austistic.Core.Entities.SupportTicket", b =>
-                {
-                    b.Property<string>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("Created")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime?>("DateUpdated")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("boolean");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("TicketNumber")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("SupportTicket");
                 });
 
             modelBuilder.Entity("Austistic.Core.Entities.SymbolImage", b =>
@@ -530,28 +466,6 @@ namespace Austistic.Core.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Austistic.Core.Entities.SupportMessage", b =>
-                {
-                    b.HasOne("Austistic.Core.Entities.SupportTicket", "SupportTicket")
-                        .WithMany("SupportMessages")
-                        .HasForeignKey("SupportTicketId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("SupportTicket");
-                });
-
-            modelBuilder.Entity("Austistic.Core.Entities.SupportTicket", b =>
-                {
-                    b.HasOne("Austistic.Core.Entities.ApplicationUser", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("Austistic.Core.Entities.SymbolImage", b =>
                 {
                     b.HasOne("Austistic.Core.Entities.CategorySymbol", "CategorySymbol")
@@ -628,11 +542,6 @@ namespace Austistic.Core.Migrations
             modelBuilder.Entity("Austistic.Core.Entities.CategorySymbol", b =>
                 {
                     b.Navigation("SymbolImages");
-                });
-
-            modelBuilder.Entity("Austistic.Core.Entities.SupportTicket", b =>
-                {
-                    b.Navigation("SupportMessages");
                 });
 #pragma warning restore 612, 618
         }

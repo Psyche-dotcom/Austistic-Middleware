@@ -21,6 +21,7 @@ namespace AlpaStock.Api.Extension
             services.AddScoped<IEmailServices, EmailService>();
             services.AddScoped<ICloudinaryService, CloudinaryService>();
             services.AddScoped<ISymbolService, SymbolService>();
+            services.AddScoped<ISupportService, SupportService>();
             services.AddScoped<IHelper, Helper>();
             services.AddScoped<IFriendService, FriendService>();
             services.AddAutoMapper(typeof(ProjectProfile));

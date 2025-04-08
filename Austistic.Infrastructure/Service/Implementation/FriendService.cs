@@ -169,8 +169,6 @@ namespace Austistic.Infrastructure.Service.Implementation
 
         }
 
-
-
         public async Task<ResponseDto<List<UserInfo>>> GetPendingFriendRequests(string userId)
         {
 

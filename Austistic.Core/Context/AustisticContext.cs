@@ -12,6 +12,8 @@ namespace AlpaStock.Core.Context
         public DbSet<SymbolImage> SymbolImage { get; set; }
         public DbSet<Friend> Friends { get; set; }
         public DbSet<CategorySymbol> CategorySymbol { get; set; }
+        public DbSet<SupportTicket> SupportTicket { get; set; }
+        public DbSet<SupportMessage> SupportMessage { get; set; }
         
         public AustisticContext(DbContextOptions options) : base(options) { }
         protected override void OnModelCreating(ModelBuilder builder)

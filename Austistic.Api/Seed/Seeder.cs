@@ -20,18 +20,17 @@ namespace Austistic.Api.Seed
             {
                 await dbContext.Database.EnsureCreatedAsync();
                 var roleManager = app.ApplicationServices.CreateScope().ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-                List<string> roles = new() { "Admin", "User" };
+                List<string> roles = new() { "SuperAdmin", "Admin", "User" };
                 foreach (var role in roles)
                 {
                     await roleManager.CreateAsync(new IdentityRole { Name = role });
                 }
             }
             await dbContext.SaveChangesAsync();
-            if(!dbContext.Users.Any())
+            if (!dbContext.Users.Any())
             {
                 var userManager = app.ApplicationServices.CreateScope().ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
-
-             await  userManager.CreateAsync(new ApplicationUser()
+                var user = new ApplicationUser()
                 {
                     Email = "Bsaheed79@gmail.com",
                     EmailConfirmed = true,
@@ -40,9 +39,11 @@ namespace Austistic.Api.Seed
                     FirstName = "Saheed",
                     LastName = "Babatunde",
                     UserName = "Psyche"
-                }, "String11@");
+                };
+                await userManager.CreateAsync(user, "String11@");
+                await userManager.AddToRoleAsync(user, "SuperAdmin");
             }
-           
+
         }
     }
 }

@@ -40,6 +40,9 @@ namespace Austistic.Infrastructure.Service.Implementation
             _mapper = mapper;
             _cloudinaryService = cloudinaryService;
         }
+
+
+       
         public async Task<ResponseDto<string>> RegisterUser(SignUp signUp, string Role)
         {
             var response = new ResponseDto<string>();
@@ -114,6 +117,64 @@ namespace Austistic.Infrastructure.Service.Implementation
             {
                 _logger.LogError(ex.Message, ex);
                 response.ErrorMessages = new List<string>() { "Error in resgistering the user" };
+                response.StatusCode = 500;
+                response.DisplayMessage = "Error";
+                return response;
+            }
+        }
+
+
+        public async Task<ResponseDto<string>> UpdateUserRole(string email, string role)
+        {
+            var response = new ResponseDto<string>();
+            try
+            {
+                var findUser = await _accountRepo.FindUserByEmailAsync(email);
+                if (findUser == null)
+                {
+                    response.ErrorMessages = new List<string>() { "There is no user with the email provided" };
+                    response.StatusCode = 404;
+                    response.DisplayMessage = "Error";
+                    return response;
+                }
+                var checkRole = await _accountRepo.RoleExist(role);
+                if (checkRole == false)
+                {
+                    response.ErrorMessages = new List<string>() { "Role is not available" };
+                    response.StatusCode = StatusCodes.Status404NotFound;
+                    response.DisplayMessage = "Error";
+                    return response;
+                }
+                var getExistingRoles = await _accountRepo.GetUserRoles(findUser);
+                if (getExistingRoles.Count > 0)
+                {
+                    var removeExistingRoles = await _accountRepo.RemoveRoleAsync(findUser, getExistingRoles);
+                    if (removeExistingRoles == false)
+                    {
+                        response.ErrorMessages = new List<string>() { "Error in removing role for user" };
+                        response.StatusCode = StatusCodes.Status400BadRequest;
+                        response.DisplayMessage = "Error";
+                        return response;
+                    }
+                }
+
+                var addRole = await _accountRepo.AddRoleAsync(findUser, role);
+                if (addRole == false)
+                {
+                    response.ErrorMessages = new List<string>() { "Fail to add role to user" };
+                    response.StatusCode = StatusCodes.Status501NotImplemented;
+                    response.DisplayMessage = "Error";
+                    return response;
+                }
+                response.StatusCode = StatusCodes.Status200OK;
+                response.DisplayMessage = "Successful";
+                response.Result = "User role updated successfully";
+                return response;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message, ex);
+                response.ErrorMessages = new List<string>() { "Error in updating user role" };
                 response.StatusCode = 500;
                 response.DisplayMessage = "Error";
                 return response;
