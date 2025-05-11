@@ -196,29 +196,40 @@ namespace Austistic.Infrastructure.Service.Implementation
             return response;
         }
 
-        public async Task<ResponseDto<List<CategorySymbol>>> GetAllcat(string userid)
+        public async Task<ResponseDto<List<CategorySymbolDto>>> GetAllcat(string userid)
         {
-            var response = new ResponseDto<List<CategorySymbol>>();
+            var response = new ResponseDto<List<CategorySymbolDto>>();
+
             try
             {
-                var retrieveCats = await _categorySymbolRepo.GetQueryable()
-                    .Where(u => u.CategoryType == AustisticEnum.Admin.ToString() || u.UserId == userid)
+                var categories = await _categorySymbolRepo.GetQueryable()
+                    .Where(c => c.CategoryType == AustisticEnum.Admin.ToString() || c.UserId == userid)
+                    .Select(c => new CategorySymbolDto
+                    {
+                        Id = c.Id,
+                        CategoryName = c.CategoryName,
+                        CategoryType = c.CategoryType,
+                        UserId = c.UserId,
+                        SymbolCount = c.SymbolImages.Count()
+                    })
                     .ToListAsync();
 
-                response.DisplayMessage = "Success";
                 response.StatusCode = 200;
-                response.Result = retrieveCats;
+                response.DisplayMessage = "Success";
+                response.Result = categories;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error in getting all category for user");
-                response.ErrorMessages = new List<string> { "Error in getting all category for user" };
+                _logger.LogError(ex, "Error in getting all symbol category");
                 response.StatusCode = 500;
                 response.DisplayMessage = "Error";
+                response.ErrorMessages = new List<string> { "Error in getting all category for user" };
             }
 
             return response;
         }
+
+
         public async Task<ResponseDto<string>> UploadSymbolCategory(string CategoryName, IFormFile file, string Description)
         {
             var response = new ResponseDto<string>();
