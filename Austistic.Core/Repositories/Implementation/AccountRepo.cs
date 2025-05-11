@@ -1,5 +1,6 @@
 ﻿using AlpaStock.Core.Context;
 using Austistic.Core.DTOs.Request.Auth;
+using Austistic.Core.DTOs.Response.Auth;
 using Austistic.Core.Entities;
 using Austistic.Core.Repositories.Interface;
 using Microsoft.AspNetCore.Identity;
@@ -182,6 +183,54 @@ namespace Austistic.Core.Repositories.Implementation
                 return true;
             }
             return false;
+        }
+        public async Task<PaginatedUser> GetAllRegisteredAdminAsync(int pageNumber, int perPageSize)
+        {
+            pageNumber = pageNumber < 1 ? 1 : pageNumber;
+            perPageSize = perPageSize < 1 ? 5 : perPageSize;
+
+            var filteredUser = _userManager.Users
+                .Join(
+                    _context.UserRoles,
+                    user => user.Id,
+                    userRole => userRole.UserId,
+                    (user, userRole) => new { User = user, UserRole = userRole })
+            .Join(
+                    _roleManager.Roles,
+                    userRole => userRole.UserRole.RoleId,
+                    role => role.Id,
+                    (userRole, role) => new { User = userRole.User, Role = role })
+                .Where(u => u.Role.Name == "Admin")
+                .Select(u => new DisplayFindUserDTO
+                {
+                    UserName = u.User.UserName,
+                    Email = u.User.Email,
+                    FirstName = u.User.FirstName,
+                    LastName = u.User.LastName,
+                    PhoneNumber = u.User.PhoneNumber,
+                    ProfilePicture = u.User.ProfilePicture,
+                    Gender = u.User.Gender,
+                    IsSuspendUser = u.User.isSuspended,
+                    Id = u.User.Id,
+                    Created = u.User.Created,
+                   UserRole ="Admin"
+                });
+
+            var totalCount = await filteredUser.CountAsync();
+            var totalPages = (int)Math.Ceiling((double)totalCount / perPageSize);
+
+            var paginatedUser = await filteredUser
+                .Skip((pageNumber - 1) * perPageSize)
+                .Take(perPageSize)
+                .ToListAsync();
+            var result = new PaginatedUser
+            {
+                CurrentPage = pageNumber,
+                PageSize = perPageSize,
+                TotalPages = totalPages,
+                User = paginatedUser,
+            };
+            return result;
         }
     }
 }

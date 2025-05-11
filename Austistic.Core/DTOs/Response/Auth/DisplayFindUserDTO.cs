@@ -11,6 +11,8 @@
         public string Email { get; set; }
         public string PhoneNumber { get; set; }
         public string UserName { get; set; }
+        public string UserRole { get; set; }
+        public string Gender { get; set; }
         public bool IsSuspendUser { get; set; }
         public bool isSubActive { get; set; }
         public DateTime Created { get; set; }

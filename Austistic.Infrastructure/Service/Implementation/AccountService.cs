@@ -8,6 +8,7 @@ using Austistic.Core.Entities;
 using Austistic.Core.Repositories.Interface;
 using AutoMapper;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -123,7 +124,78 @@ namespace Austistic.Infrastructure.Service.Implementation
             }
         }
 
+        public async Task<ResponseDto<string>> RegisterAdmin(SignUp signUp)
+        {
+            var response = new ResponseDto<string>();
+            try
+            {
+                var checkUserExist = await _accountRepo.FindUserByEmailAsync(signUp.Email);
+                if (checkUserExist != null)
+                {
+                    response.ErrorMessages = new List<string>() { "User with the email already exist" };
+                    response.StatusCode = 400;
+                    response.DisplayMessage = "Error";
+                    return response;
+                }
+                var checkRole = await _accountRepo.RoleExist("Admin");
+                if (checkRole == false)
+                {
+                    response.ErrorMessages = new List<string>() { "Role is not available" };
+                    response.StatusCode = StatusCodes.Status404NotFound;
+                    response.DisplayMessage = "Error";
+                    return response;
+                }
+                var mapAccount = new ApplicationUser();
 
+                mapAccount.FirstName = signUp.FirstName;
+                mapAccount.LastName = signUp.LastName;
+                mapAccount.Country = signUp.Country;
+                mapAccount.Email = signUp.Email;
+                mapAccount.PhoneNumber = signUp.PhoneNumber;
+                mapAccount.UserName = signUp.UserName;
+                mapAccount.Age = signUp.Age;
+                mapAccount.Gender = signUp.Gender;
+                mapAccount.EmailConfirmed = true;
+
+
+                var createUser = await _accountRepo.SignUpAsync(mapAccount, signUp.Password);
+                if (createUser == null)
+                {
+                    response.ErrorMessages = new List<string>() { "User not created successfully" };
+                    response.StatusCode = StatusCodes.Status501NotImplemented;
+                    response.DisplayMessage = "Error";
+                    return response;
+                }
+                var addRole = await _accountRepo.AddRoleAsync(createUser, "Admin");
+                if (addRole == false)
+                {
+                    response.ErrorMessages = new List<string>() { "Fail to add role to user" };
+                    response.StatusCode = StatusCodes.Status501NotImplemented;
+                    response.DisplayMessage = "Error";
+                    return response;
+                }
+               
+                var message = new Message(new string[] { createUser.Email }, "Admin Credential", $"<p>Your admin credential is below<p>" +
+                    $"<h3>Email: {mapAccount.Email}</h3>" +
+                    $"<h3>Password: {signUp.Password}</h3>"
+                    );
+                _emailServices.SendEmail(message);
+
+                
+                response.StatusCode = StatusCodes.Status200OK;
+                response.DisplayMessage = "Successful";
+                response.Result = "User successfully created";
+                return response;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message, ex);
+                response.ErrorMessages = new List<string>() { "Error in resgistering the user" };
+                response.StatusCode = 500;
+                response.DisplayMessage = "Error";
+                return response;
+            }
+        }
         public async Task<ResponseDto<string>> UpdateUserRole(string email, string role)
         {
             var response = new ResponseDto<string>();
@@ -644,7 +716,26 @@ namespace Austistic.Infrastructure.Service.Implementation
                 return response;
             }
         }
-
+        public async Task<ResponseDto<PaginatedUser>> GetAllAdminAsync(int pageNumber, int perPageSize)
+        {
+            var response = new ResponseDto<PaginatedUser>();
+            try
+            {
+                var getAdmin = await _accountRepo.GetAllRegisteredAdminAsync(pageNumber, perPageSize);
+                response.StatusCode = StatusCodes.Status200OK;
+                response.DisplayMessage = "Success";
+                response.Result = getAdmin;
+                return response;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message, ex);
+                response.ErrorMessages = new List<string>() { "Error in retrieving all camgirl" };
+                response.StatusCode = 500;
+                response.DisplayMessage = "Error";
+                return response;
+            }
+        }
 
     }
 }

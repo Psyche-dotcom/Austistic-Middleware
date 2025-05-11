@@ -1,4 +1,5 @@
 ﻿using Austistic.Core.DTOs.Request.Auth;
+using Austistic.Core.DTOs.Response.Auth;
 using Austistic.Core.Entities;
 
 namespace Austistic.Core.Repositories.Interface
@@ -10,7 +11,7 @@ namespace Austistic.Core.Repositories.Interface
       
         Task<bool> CheckAccountPassword(ApplicationUser user, string password);
         int GenerateToken();
-
+        Task<PaginatedUser> GetAllRegisteredAdminAsync(int pageNumber, int perPageSize);
         int GenerateConfirmEmailToken();
         Task<bool> DeleteUserToken(ConfirmEmailToken token);
         Task<ConfirmEmailToken> retrieveUserToken(string userid);

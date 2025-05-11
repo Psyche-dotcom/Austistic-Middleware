@@ -38,6 +38,23 @@ namespace Austistic.Api.Controllers
                 return BadRequest(result);
             }
         }
+        [HttpPost("admin/register")]
+        public async Task<IActionResult> RegisterAdmin(SignUp req)
+        {
+            var result = await _accountService.RegisterAdmin(req);
+            if (result.StatusCode == 200)
+            {
+                return Ok(result);
+            }
+            else if (result.StatusCode == 404)
+            {
+                return NotFound(result);
+            }
+            else
+            {
+                return BadRequest(result);
+            }
+        }
 
         [HttpPost("user/login")]
         public async Task<IActionResult> Login(SignInModel req)
@@ -56,7 +73,24 @@ namespace Austistic.Api.Controllers
                 return BadRequest(result);
             }
         }
-
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        [HttpGet("all/{per_page_size}/{page_number}")]
+        public async Task<IActionResult> GetAllAdminAsync(int page_number, int per_page_size)
+        {
+            var result = await _accountService.GetAllAdminAsync(page_number, per_page_size);
+            if (result.StatusCode == 200)
+            {
+                return Ok(result);
+            }
+            else if (result.StatusCode == 404)
+            {
+                return NotFound(result);
+            }
+            else
+            {
+                return BadRequest(result);
+            }
+        }
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpGet("user/info")]
         public async Task<IActionResult> UserInfoAsync()
