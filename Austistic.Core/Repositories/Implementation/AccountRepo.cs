@@ -229,6 +229,7 @@ namespace Austistic.Core.Repositories.Implementation
                 PageSize = perPageSize,
                 TotalPages = totalPages,
                 User = paginatedUser,
+                TotalUserCount = totalCount,
             };
             return result;
         }
