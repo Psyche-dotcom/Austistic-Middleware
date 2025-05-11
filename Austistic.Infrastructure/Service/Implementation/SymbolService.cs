@@ -1,6 +1,7 @@
 ﻿using AlpaStock.Core.DTOs;
 using AlpaStock.Core.Repositories.Interface;
 using Austistic.Core.DTOs.Request;
+using Austistic.Core.DTOs.Response.symbol;
 using Austistic.Core.Entities;
 using Austistic.Core.Repositories.Interface;
 using Austistic.Infrastructure.Service.Interface;
@@ -153,31 +154,48 @@ namespace Austistic.Infrastructure.Service.Implementation
                 return response;
             }
         }
-        public async Task<ResponseDto<List<string>>> GetAllSymbolIncat(string catid)
+        public async Task<ResponseDto<List<Symbolresp>>> GetAllSymbolIncat(string? catid)
         {
-            var response = new ResponseDto<List<string>>();
+            var response = new ResponseDto<List<Symbolresp>>();
+
             try
             {
-                var retrieveSymbol = await _symbolImageRepo.GetQueryable()
-                    .Where(u => u.CategorySymbolId == catid)
-                    .Select(u => u.SymbolIdentifier)
-                    .ToListAsync();
-               
-                response.DisplayMessage = "Success";
-                response.StatusCode = 200;
-                response.Result = retrieveSymbol;
-                return response;
+                IQueryable<SymbolImage> query = _symbolImageRepo.GetQueryable();
 
+                if (string.IsNullOrEmpty(catid))
+                {
+                    // Filter symbols for "Admin" category type when no category ID is provided
+                    query = query.Where(s => s.CategorySymbol.CategoryType == "Admin");
+                }
+                else
+                {
+                    // Filter symbols by the provided category ID
+                    query = query.Where(s => s.CategorySymbolId == catid);
+                }
+
+                var symbols = await query
+                    .Select(s => new Symbolresp
+                    {
+                        Description = s.Description,
+                        SymbolId = s.SymbolIdentifier
+                    })
+                    .ToListAsync();
+
+                response.StatusCode = 200;
+                response.DisplayMessage = "Success";
+                response.Result = symbols;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex.Message, ex);
-                response.ErrorMessages = new List<string>() { "Error in getting symbol in category" };
+                _logger.LogError(ex, "Error retrieving symbols");
                 response.StatusCode = 500;
                 response.DisplayMessage = "Error";
-                return response;
+                response.ErrorMessages = new List<string> { "Error in getting symbol in category" };
             }
+
+            return response;
         }
+
         public async Task<ResponseDto<List<CategorySymbol>>> GetAllcat(string userid)
         {
             var response = new ResponseDto<List<CategorySymbol>>();
