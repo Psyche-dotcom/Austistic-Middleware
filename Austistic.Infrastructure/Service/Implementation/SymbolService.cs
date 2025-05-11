@@ -6,6 +6,7 @@ using Austistic.Core.Entities;
 using Austistic.Core.Repositories.Interface;
 using Austistic.Infrastructure.Service.Interface;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -178,6 +179,7 @@ namespace Austistic.Infrastructure.Service.Implementation
                     {
                         Description = s.Description,
                         SymbolId = s.SymbolIdentifier,
+                        Created= s.Created,
                         Catid = s.CategorySymbolId
                         
                     })
