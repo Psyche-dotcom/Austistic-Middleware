@@ -177,7 +177,9 @@ namespace Austistic.Infrastructure.Service.Implementation
                     .Select(s => new Symbolresp
                     {
                         Description = s.Description,
-                        SymbolId = s.SymbolIdentifier
+                        SymbolId = s.SymbolIdentifier,
+                        Catid = s.CategorySymbolId
+                        
                     })
                     .ToListAsync();
 
