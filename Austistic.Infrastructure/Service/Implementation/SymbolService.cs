@@ -6,7 +6,6 @@ using Austistic.Core.Entities;
 using Austistic.Core.Repositories.Interface;
 using Austistic.Infrastructure.Service.Interface;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -101,8 +100,8 @@ namespace Austistic.Infrastructure.Service.Implementation
             try
             {
                 var retriveSymbol = await _symbolImageRepo.GetQueryable().
-                    FirstOrDefaultAsync(x=>x.SymbolIdentifier == SymbolIdentifier);
-                if(retriveSymbol == null)
+                    FirstOrDefaultAsync(x => x.SymbolIdentifier == SymbolIdentifier);
+                if (retriveSymbol == null)
                 {
                     response.ErrorMessages = new List<string>() { "symbol not available" };
                     response.StatusCode = 400;
@@ -130,8 +129,8 @@ namespace Austistic.Infrastructure.Service.Implementation
             try
             {
                 var retriveSymbol = await _symbolImageRepo.GetQueryable().
-                    FirstOrDefaultAsync(x=>x.SymbolIdentifier == SymbolIdentifier);
-                if(retriveSymbol == null)
+                    FirstOrDefaultAsync(x => x.SymbolIdentifier == SymbolIdentifier);
+                if (retriveSymbol == null)
                 {
                     response.ErrorMessages = new List<string>() { "symbol not available" };
                     response.StatusCode = 400;
@@ -149,7 +148,38 @@ namespace Austistic.Infrastructure.Service.Implementation
             catch (Exception ex)
             {
                 _logger.LogError(ex.Message, ex);
-                response.ErrorMessages = new List<string>() { "Error in creating category" };
+                response.ErrorMessages = new List<string>() { "Error in deleting symbol" };
+                response.StatusCode = 500;
+                response.DisplayMessage = "Error";
+                return response;
+            }
+        }
+        public async Task<ResponseDto<string>> DeleteCat(string catid)
+        {
+            var response = new ResponseDto<string>();
+            try
+            {
+                var retriveSymbol = await _categorySymbolRepo.GetQueryable().
+                    FirstOrDefaultAsync(x => x.Id == catid);
+                if (retriveSymbol == null)
+                {
+                    response.ErrorMessages = new List<string>() { "category not available" };
+                    response.StatusCode = 400;
+                    response.DisplayMessage = "Error";
+                    return response;
+                }
+                _categorySymbolRepo.Delete(retriveSymbol);
+                await _symbolImageRepo.SaveChanges();
+                response.DisplayMessage = "Success";
+                response.StatusCode = 200;
+                response.Result = "Category deleted success";
+                return response;
+
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message, ex);
+                response.ErrorMessages = new List<string>() { "Error in deleting category" };
                 response.StatusCode = 500;
                 response.DisplayMessage = "Error";
                 return response;
@@ -179,9 +209,9 @@ namespace Austistic.Infrastructure.Service.Implementation
                     {
                         Description = s.Description,
                         SymbolId = s.SymbolIdentifier,
-                        Created= s.Created,
+                        Created = s.Created,
                         Catid = s.CategorySymbolId
-                        
+
                     })
                     .ToListAsync();
 
@@ -239,7 +269,7 @@ namespace Austistic.Infrastructure.Service.Implementation
             var response = new ResponseDto<string>();
             try
             {
-                
+
                 var checkCateName = await _categorySymbolRepo
                    .GetQueryable().FirstOrDefaultAsync(u => u.CategoryName == CategoryName);
                 if (checkCateName == null)

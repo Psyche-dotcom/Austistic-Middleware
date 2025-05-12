@@ -107,6 +107,24 @@ namespace Austistic.Api.Controllers
             {
                 return BadRequest(result);
             }
+        } 
+        [HttpDelete("cat/delete/{id}")]
+        public async Task<IActionResult> DeleteCat(string id)
+        {
+
+            var result = await _symbolService.DeleteCat(id);
+            if (result.StatusCode == 200)
+            {
+                return Ok(result);
+            }
+            else if (result.StatusCode == 404)
+            {
+                return NotFound(result);
+            }
+            else
+            {
+                return BadRequest(result);
+            }
         }
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpGet("category/all")]

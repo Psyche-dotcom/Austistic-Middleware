@@ -12,6 +12,7 @@ namespace Austistic.Infrastructure.Service.Interface
         Task<ResponseDto<string>> UploadSymbolCategory(string CategoryName, IFormFile file, string Description);
         Task<ResponseDto<string>> DeleteSymbol(string SymbolIdentifier);
         Task<ResponseDto<List<Symbolresp>>> GetAllSymbolIncat(string catid);
-        Task<ResponseDto<List<CategorySymbolDto>>> GetAllcat(string userid);
+        Task<ResponseDto<List<CategorySymbolDto>>> GetAllcat(string userid); 
+        Task<ResponseDto<string>> DeleteCat(string catid);
     }
 }
