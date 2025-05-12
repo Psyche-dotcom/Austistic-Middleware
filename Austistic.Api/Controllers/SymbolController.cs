@@ -7,6 +7,7 @@ using System.IdentityModel.Tokens.Jwt;
 
 namespace Austistic.Api.Controllers
 {
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [Route("api/symbol")]
     [ApiController]
     public class SymbolController : ControllerBase
@@ -17,7 +18,7 @@ namespace Austistic.Api.Controllers
         {
             _symbolService = symbolService;
         }
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        
         [HttpPost("category/create")]
         public async Task<IActionResult> CreateCategory(CreateSymbolCategory req)
         {
@@ -126,7 +127,7 @@ namespace Austistic.Api.Controllers
                 return BadRequest(result);
             }
         }
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+       
         [HttpGet("category/all")]
         public async Task<IActionResult> GetAllcat()
         {
