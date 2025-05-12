@@ -73,6 +73,7 @@ namespace Austistic.Api.Controllers
                 return BadRequest(result);
             }
         }
+        [AllowAnonymous]
         [HttpGet("image/{id}")]
         public async Task<IActionResult> GetSymbolImageByte(string id)
         {
