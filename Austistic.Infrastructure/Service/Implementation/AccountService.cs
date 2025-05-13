@@ -472,12 +472,12 @@ namespace Austistic.Infrastructure.Service.Implementation
                 return response;
             }
         }
-        public async Task<ResponseDto<string>> ForgotPassword(string CompanyEmail)
+        public async Task<ResponseDto<string>> ForgotPassword(string Email)
         {
             var response = new ResponseDto<string>();
             try
             {
-                var checkUser = await _accountRepo.FindUserByEmailAsync(CompanyEmail);
+                var checkUser = await _accountRepo.FindUserByEmailAsync(Email);
                 if (checkUser == null)
                 {
                     response.ErrorMessages = new List<string>() { "Email is not available" };
