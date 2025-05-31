@@ -37,6 +37,7 @@ namespace Austistic.Api.Controllers
                 return BadRequest(result);
             }
         }
+        [AllowAnonymous]
         [HttpPost("category/retrieve_all_symbol")]
         public async Task<IActionResult> CreateCategory(CatSymbol req)
         {
@@ -128,11 +129,11 @@ namespace Austistic.Api.Controllers
                 return BadRequest(result);
             }
         }
-       
+        [AllowAnonymous]
         [HttpGet("category/all")]
-        public async Task<IActionResult> GetAllcat()
+        public async Task<IActionResult> GetAllcat(string? userid)
         {
-            var userid = User.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Jti)?.Value;
+           
             var result = await _symbolService.GetAllcat(userid);
             if (result.StatusCode == 200)
             {
