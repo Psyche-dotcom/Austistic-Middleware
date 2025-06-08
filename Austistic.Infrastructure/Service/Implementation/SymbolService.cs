@@ -185,6 +185,50 @@ namespace Austistic.Infrastructure.Service.Implementation
                 return response;
             }
         }
+        /*   public async Task<ResponseDto<List<Symbolresp>>> GetAllSymbolIncat(string? catid)
+           {
+               var response = new ResponseDto<List<Symbolresp>>();
+
+               try
+               {
+                   IQueryable<SymbolImage> query = _symbolImageRepo.GetQueryable();
+
+                   if (string.IsNullOrEmpty(catid))
+                   {
+                       // Filter symbols for "Admin" category type when no category ID is provided
+                       query = query.Where(s => s.CategorySymbol.CategoryType == "Admin");
+                   }
+                   else
+                   {
+                       // Filter symbols by the provided category ID
+                       query = query.Where(s => s.CategorySymbolId == catid);
+                   }
+                   query = query.OrderBy(u => u.Description);
+                   var symbols = await query
+                       .Select(s => new Symbolresp
+                       {
+                           Description = s.Description,
+                           SymbolId = s.SymbolIdentifier,
+                           Created = s.Created,
+                           Catid = s.CategorySymbolId
+
+                       })
+                       .ToListAsync();
+
+                   response.StatusCode = 200;
+                   response.DisplayMessage = "Success";
+                   response.Result = symbols;
+               }
+               catch (Exception ex)
+               {
+                   _logger.LogError(ex, "Error retrieving symbols");
+                   response.StatusCode = 500;
+                   response.DisplayMessage = "Error";
+                   response.ErrorMessages = new List<string> { "Error in getting symbol in category" };
+               }
+
+               return response;
+           }*/
         public async Task<ResponseDto<List<Symbolresp>>> GetAllSymbolIncat(string? catid)
         {
             var response = new ResponseDto<List<Symbolresp>>();
@@ -195,12 +239,10 @@ namespace Austistic.Infrastructure.Service.Implementation
 
                 if (string.IsNullOrEmpty(catid))
                 {
-                    // Filter symbols for "Admin" category type when no category ID is provided
                     query = query.Where(s => s.CategorySymbol.CategoryType == "Admin");
                 }
                 else
                 {
-                    // Filter symbols by the provided category ID
                     query = query.Where(s => s.CategorySymbolId == catid);
                 }
 
@@ -211,9 +253,23 @@ namespace Austistic.Infrastructure.Service.Implementation
                         SymbolId = s.SymbolIdentifier,
                         Created = s.Created,
                         Catid = s.CategorySymbolId
-
                     })
                     .ToListAsync();
+
+                // Sort in memory: numbers first (numerically), then others (alphabetically)
+                symbols = symbols
+                    .OrderBy(s =>
+                    {
+                        bool isNumeric = double.TryParse(s.Description, out double num);
+                        return isNumeric ? 0 : 1;
+                    })
+                    .ThenBy(s =>
+                    {
+                        bool isNumeric = double.TryParse(s.Description, out double num);
+                        return isNumeric ? num : double.MaxValue;
+                    })
+                    .ThenBy(s => s.Description)
+                    .ToList();
 
                 response.StatusCode = 200;
                 response.DisplayMessage = "Success";
@@ -229,6 +285,7 @@ namespace Austistic.Infrastructure.Service.Implementation
 
             return response;
         }
+
 
         public async Task<ResponseDto<List<CategorySymbolDto>>> GetAllcat(string userid)
         {
