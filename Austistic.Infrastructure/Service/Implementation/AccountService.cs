@@ -340,7 +340,7 @@ namespace Austistic.Infrastructure.Service.Implementation
                     ProfilePicture = fetchUser.ProfilePicture,
                     isSuspended = fetchUser.isSuspended,
                     IsEmailConfirmed = fetchUser.EmailConfirmed,
-
+                    Age= fetchUser.Age,
                     Created = fetchUser.Created,
 
 
