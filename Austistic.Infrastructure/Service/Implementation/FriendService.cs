@@ -278,6 +278,39 @@ namespace Austistic.Infrastructure.Service.Implementation
             }
 
         }
+        public async Task<ResponseDto<string>> DeleteFriendRequest(string friend_requestId)
+        {
+            var response = new ResponseDto<string>();
+            try
+            {
+                var friendRequest = await _context.Friends
+               .FirstOrDefaultAsync(f => f.Id == friend_requestId && f.Status == FriendStatus.Pending);
+
+                if (friendRequest == null)
+                {
+                    response.ErrorMessages = new List<string>() { "Changing friend status not successfully" };
+                    response.StatusCode = 501;
+                    response.DisplayMessage = "Error";
+                    return response;
+                }
+               
+                _context.Friends.Remove(friendRequest);
+                _context.SaveChanges();
+                response.StatusCode = StatusCodes.Status200OK;
+                response.DisplayMessage = "Success";
+                response.Result = $"Friend request deleted successfully";
+                return response;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message, ex);
+                response.ErrorMessages = new List<string>() { "Error in deleting friend request status" };
+                response.StatusCode = 501;
+                response.DisplayMessage = "Error";
+                return response;
+            }
+
+        }
 
         public async Task<ResponseDto<List<UserInfo>>> GetPendingFriendRequests(string userId)
         {
