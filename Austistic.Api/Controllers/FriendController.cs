@@ -23,7 +23,7 @@ namespace Austistic.Api.Controllers
         public async Task<IActionResult> GetSuggestFriendsAsync(int limit, string? filter)
         {
             var userid = User.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Jti)?.Value;
-            var result = await _friendService.SuggestFriends(userid,limit, filter);
+            var result = await _friendService.SuggestFriends(userid, limit, filter);
             if (result.StatusCode == 200)
             {
                 return Ok(result);
@@ -61,7 +61,7 @@ namespace Austistic.Api.Controllers
         public async Task<IActionResult> GetFriendRequentAndSent(string type)
         {
             var userid = User.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Jti)?.Value;
-            var result = await _friendService.GetSentAndReceiveFriends(userid,type);
+            var result = await _friendService.GetSentAndReceiveFriends(userid, type);
             if (result.StatusCode == 200)
             {
                 return Ok(result);
@@ -93,13 +93,13 @@ namespace Austistic.Api.Controllers
             {
                 return BadRequest(result);
             }
-        } 
+        }
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPost("send_request")]
         public async Task<IActionResult> SendFriendRequest(SendFriendReq req)
         {
             var userid = User.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Jti)?.Value;
-            var result = await _friendService.SendFriendRequest(userid,req.FriendId);
+            var result = await _friendService.SendFriendRequest(userid, req.FriendId);
             if (result.StatusCode == 200)
             {
                 return Ok(result);
@@ -112,13 +112,32 @@ namespace Austistic.Api.Controllers
             {
                 return BadRequest(result);
             }
-        } 
+        }
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPost("approve_request")]
         public async Task<IActionResult> ApproveFriendRequest(ApproveFriendReq req)
         {
             var userid = User.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Jti)?.Value;
-            var result = await _friendService.ApproveFriendRequest(req.FriendRequestId,req.FriendStatus);
+            var result = await _friendService.ApproveFriendRequest(req.FriendRequestId, req.FriendStatus);
+            if (result.StatusCode == 200)
+            {
+                return Ok(result);
+            }
+            else if (result.StatusCode == 404)
+            {
+                return NotFound(result);
+            }
+            else
+            {
+                return BadRequest(result);
+            }
+        }
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [HttpPost("delete_request")]
+        public async Task<IActionResult> DeleteFriendRequest(string FriendRequestId)
+        {
+
+            var result = await _friendService.DeleteFriendRequest(FriendRequestId);
             if (result.StatusCode == 200)
             {
                 return Ok(result);
