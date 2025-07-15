@@ -39,7 +39,7 @@ namespace Austistic.Infrastructure.Service.Implementation
 
                 int minAge = user.Age - 5;
                 int maxAge = user.Age + 10;
-                if(string.IsNullOrEmpty(filter))
+                if(!string.IsNullOrEmpty(filter))
                 {
                     var Friendusers = await _context.Users.Where(u=>u.FirstName.Contains(filter)
                     || u.LastName.Contains(filter) 
