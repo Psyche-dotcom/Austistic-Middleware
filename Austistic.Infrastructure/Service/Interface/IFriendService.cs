@@ -11,5 +11,6 @@ namespace Austistic.Infrastructure.Service.Interface
         Task<ResponseDto<string>> SendFriendRequest(string userId, string friendId);
         Task<ResponseDto<string>> ApproveFriendRequest(string friend_requestId, FriendStatus friendStatus);
         Task<ResponseDto<List<UserInfo>>> GetPendingFriendRequests(string userId);
+        Task<ResponseDto<List<UserInfo>>> GetSentAndReceiveFriends(string userId, string type);
     }
 }

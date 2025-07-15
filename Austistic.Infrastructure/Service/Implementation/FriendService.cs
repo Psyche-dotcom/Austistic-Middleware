@@ -142,6 +142,74 @@ namespace Austistic.Infrastructure.Service.Implementation
                 return response;
             }
         }
+        public async Task<ResponseDto<List<UserInfo>>> GetSentAndReceiveFriends(string userId, string type)
+        {
+            var response = new ResponseDto<List<UserInfo>>();
+            try
+            {
+                if(type == "sent") {
+
+
+                    var friends = await _context.Friends
+                           .Where(f =>
+                               (f.UserId == userId && f.Status == FriendStatus.Pending) 
+                             )
+                           .Select(f => new UserInfo
+                           {
+                               Id =  f.Id ,
+                               Email =  f.FriendUser.Email,
+                               UserName =  f.FriendUser.UserName ,
+                               FirstName = f.FriendUser.FirstName,
+                               LastName =  f.FriendUser.LastName ,
+                               Country =  f.FriendUser.Country ,
+                               PhoneNumber = f.FriendUser.PhoneNumber ,
+                               ProfilePicture =  f.FriendUser.ProfilePicture,
+                               Age = f.FriendUser.Age ,
+                               Gender =  f.FriendUser.Gender,
+                           })
+                           .ToListAsync();
+
+                    response.StatusCode = StatusCodes.Status200OK;
+                    response.DisplayMessage = "Success";
+                    response.Result = friends;
+                    return response;
+
+
+                }
+                var friendReq = await _context.Friends
+                           .Where(f =>
+                               (f.FriendUserId == userId && f.Status == FriendStatus.Pending)
+                             )
+                           .Select(f => new UserInfo
+                           {
+                               Id = f.Id,
+                               Email = f.User.Email,
+                               UserName = f.User.UserName,
+                               FirstName = f.User.FirstName,
+                               LastName = f.User.LastName,
+                               Country = f.User.Country,
+                               PhoneNumber = f.User.PhoneNumber,
+                               ProfilePicture = f.User.ProfilePicture,
+                               Age = f.User.Age,
+                               Gender = f.User.Gender,
+                           })
+                           .ToListAsync();
+
+                response.StatusCode = StatusCodes.Status200OK;
+                response.DisplayMessage = "Success";
+                response.Result = friendReq;
+                return response;
+
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
+                response.ErrorMessages = new List<string> { "Error in getting user's friends" };
+                response.StatusCode = 501;
+                response.DisplayMessage = "Error";
+                return response;
+            }
+        }
 
 
         public async Task<ResponseDto<string>> SendFriendRequest(string userId, string friendId)
