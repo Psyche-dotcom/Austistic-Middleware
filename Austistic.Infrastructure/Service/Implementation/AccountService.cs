@@ -342,7 +342,7 @@ namespace Austistic.Infrastructure.Service.Implementation
                     IsEmailConfirmed = fetchUser.EmailConfirmed,
                     Age= fetchUser.Age,
                     Created = fetchUser.Created,
-
+                    Gender = fetchUser.Gender,
 
                 };
 
