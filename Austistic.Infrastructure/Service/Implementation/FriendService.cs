@@ -24,36 +24,43 @@ namespace Austistic.Infrastructure.Service.Implementation
             _logger = logger;
         }
 
-        public async Task<ResponseDto<List<UserInfo>>> SuggestFriends(string userId)
+        public async Task<ResponseDto<List<UserInfo>>> SuggestFriends(string userId, int limit)
         {
             var response = new ResponseDto<List<UserInfo>>();
             try
             {
-                var user = _context.Users.Find(userId);
+                var user = await _context.Users.FindAsync(userId);
                 if (user == null)
                 {
                     throw new Exception("User not found");
                 }
 
+                int minAge = user.Age - 5;
+                int maxAge = user.Age + 10;
+
                 var suggestedFriends = await _context.Users
                     .Where(u => u.Id != userId &&
-                                u.Age == user.Age &&
-                                u.Country == user.Country &&
-                                u.Gender == user.Gender &&
-                                !_context.Friends.Any(f => (f.UserId == userId && f.FriendId == u.Id) || (f.UserId == u.Id && f.FriendId == userId))).Select(u => new UserInfo()
-                                {
-                                    Id = u.Id,
-                                    Email = u.Email,
-                                    UserName = u.UserName,
-                                    FirstName = u.FirstName,
-                                    LastName = u.LastName,
-                                    Country = u.Country,
-                                    PhoneNumber = u.PhoneNumber,
-                                    ProfilePicture = u.ProfilePicture,
-                                    Age = u.Age,
-                                    Gender = u.Gender,
-                                })
+                                u.Age >= minAge &&
+                                u.Age <= maxAge &&
+                                !_context.Friends.Any(f =>
+                                    (f.UserId == userId && f.FriendId == u.Id) ||
+                                    (f.UserId == u.Id && f.FriendId == userId)))
+                    .Select(u => new UserInfo
+                    {
+                        Id = u.Id,
+                        Email = u.Email,
+                        UserName = u.UserName,
+                        FirstName = u.FirstName,
+                        LastName = u.LastName,
+                        Country = u.Country,
+                        PhoneNumber = u.PhoneNumber,
+                        ProfilePicture = u.ProfilePicture,
+                        Age = u.Age,
+                        Gender = u.Gender,
+                    })
+                    .Take(limit)
                     .ToListAsync();
+
                 response.StatusCode = StatusCodes.Status200OK;
                 response.DisplayMessage = "Success";
                 response.Result = suggestedFriends;
@@ -61,13 +68,14 @@ namespace Austistic.Infrastructure.Service.Implementation
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex.Message, ex);
-                response.ErrorMessages = new List<string>() { "Error in getting suggested friend" };
+                _logger.LogError(ex, ex.Message);
+                response.ErrorMessages = new List<string> { "Error in getting suggested friends" };
                 response.StatusCode = 501;
                 response.DisplayMessage = "Error";
                 return response;
             }
         }
+
 
         public async Task<ResponseDto<List<UserInfo>>> GetFriends(string userId)
         {
@@ -178,7 +186,7 @@ namespace Austistic.Infrastructure.Service.Implementation
                 var pendingRequests = await _context.Friends
                 .Where(f => f.FriendId == userId && f.Status == FriendStatus.Pending).Select(u => new UserInfo()
                 {
-                    Id = u.FriendUser.Id,
+                    Id = u.Id,
                     Email = u.FriendUser.Email,
                     UserName = u.FriendUser.UserName,
                     FirstName = u.FriendUser.FirstName,

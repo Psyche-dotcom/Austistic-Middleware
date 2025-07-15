@@ -1,7 +1,7 @@
 ﻿namespace Austistic.Core.Entities
 {
 
-    public class Friend
+    public class Friend : BaseEntity
     {
         public string UserId { get; set; }
         public ApplicationUser User { get; set; }

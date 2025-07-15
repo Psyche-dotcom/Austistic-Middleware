@@ -20,10 +20,10 @@ namespace Austistic.Api.Controllers
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpGet("suggestion")]
-        public async Task<IActionResult> GetSuggestFriendsAsync()
+        public async Task<IActionResult> GetSuggestFriendsAsync(int limit)
         {
             var userid = User.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Jti)?.Value;
-            var result = await _friendService.SuggestFriends(userid);
+            var result = await _friendService.SuggestFriends(userid,limit);
             if (result.StatusCode == 200)
             {
                 return Ok(result);
