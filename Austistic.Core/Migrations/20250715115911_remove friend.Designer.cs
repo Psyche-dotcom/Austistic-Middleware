@@ -3,6 +3,7 @@ using System;
 using AlpaStock.Core.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Austistic.Core.Migrations
 {
     [DbContext(typeof(AustisticContext))]
-    partial class AustisticContextModelSnapshot : ModelSnapshot
+    [Migration("20250715115911_remove friend")]
+    partial class removefriend
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -211,41 +214,6 @@ namespace Austistic.Core.Migrations
                         .IsUnique();
 
                     b.ToTable("ForgetPasswordTokens");
-                });
-
-            modelBuilder.Entity("Austistic.Core.Entities.Friend", b =>
-                {
-                    b.Property<string>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("Created")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime?>("DateUpdated")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("FriendUserId")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("boolean");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("FriendUserId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("Friends");
                 });
 
             modelBuilder.Entity("Austistic.Core.Entities.SupportMessage", b =>
@@ -524,25 +492,6 @@ namespace Austistic.Core.Migrations
                         .IsRequired();
 
                     b.Navigation("user");
-                });
-
-            modelBuilder.Entity("Austistic.Core.Entities.Friend", b =>
-                {
-                    b.HasOne("Austistic.Core.Entities.ApplicationUser", "FriendUser")
-                        .WithMany()
-                        .HasForeignKey("FriendUserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Austistic.Core.Entities.ApplicationUser", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("FriendUser");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Austistic.Core.Entities.SupportMessage", b =>

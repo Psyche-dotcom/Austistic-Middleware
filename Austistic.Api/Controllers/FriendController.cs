@@ -99,7 +99,7 @@ namespace Austistic.Api.Controllers
         public async Task<IActionResult> ApproveFriendRequest(ApproveFriendReq req)
         {
             var userid = User.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Jti)?.Value;
-            var result = await _friendService.ApproveFriendRequest(userid,req.FriendId,req.FriendStatus);
+            var result = await _friendService.ApproveFriendRequest(req.FriendRequestId,req.FriendStatus);
             if (result.StatusCode == 200)
             {
                 return Ok(result);

@@ -5,6 +5,6 @@ namespace Austistic.Core.DTOs.Request.Friend
     public class ApproveFriendReq
     {
         public FriendStatus FriendStatus { get; set; }
-        public string FriendId { get; set; }
+        public string FriendRequestId { get; set; }
     }
 }

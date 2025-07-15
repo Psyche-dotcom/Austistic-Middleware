@@ -24,6 +24,8 @@ namespace Austistic.Infrastructure.Service.Implementation
             _logger = logger;
         }
 
+
+
         public async Task<ResponseDto<List<UserInfo>>> SuggestFriends(string userId, int limit)
         {
             var response = new ResponseDto<List<UserInfo>>();
@@ -43,8 +45,8 @@ namespace Austistic.Infrastructure.Service.Implementation
                                 u.Age >= minAge &&
                                 u.Age <= maxAge &&
                                 !_context.Friends.Any(f =>
-                                    (f.UserId == userId && f.FriendId == u.Id) ||
-                                    (f.UserId == u.Id && f.FriendId == userId)))
+                                    (f.UserId == userId && f.FriendUserId == u.Id) ||
+                                    (f.UserId == u.Id && f.FriendUserId == userId)))
                     .Select(u => new UserInfo
                     {
                         Id = u.Id,
@@ -83,21 +85,24 @@ namespace Austistic.Infrastructure.Service.Implementation
             try
             {
                 var friends = await _context.Friends
-                .Where(f => f.UserId == userId && f.Status == FriendStatus.Approved)
-                .Select(u => new UserInfo()
-                {
-                    Id = u.FriendUser.Id,
-                    Email = u.FriendUser.Email,
-                    UserName = u.FriendUser.UserName,
-                    FirstName = u.FriendUser.FirstName,
-                    LastName = u.FriendUser.LastName,
-                    Country = u.FriendUser.Country,
-                    PhoneNumber = u.FriendUser.PhoneNumber,
-                    ProfilePicture = u.FriendUser.ProfilePicture,
-                    Age = u.FriendUser.Age,
-                    Gender = u.FriendUser.Gender,
-                })
-                .ToListAsync();
+                    .Where(f =>
+                        (f.UserId == userId && f.Status == FriendStatus.Approved) ||
+                        (f.FriendUserId == userId && f.Status == FriendStatus.Approved))
+                    .Select(f => new UserInfo
+                    {
+                        Id = f.UserId == userId ? f.FriendUser.Id : f.User.Id,
+                        Email = f.UserId == userId ? f.FriendUser.Email : f.User.Email,
+                        UserName = f.UserId == userId ? f.FriendUser.UserName : f.User.UserName,
+                        FirstName = f.UserId == userId ? f.FriendUser.FirstName : f.User.FirstName,
+                        LastName = f.UserId == userId ? f.FriendUser.LastName : f.User.LastName,
+                        Country = f.UserId == userId ? f.FriendUser.Country : f.User.Country,
+                        PhoneNumber = f.UserId == userId ? f.FriendUser.PhoneNumber : f.User.PhoneNumber,
+                        ProfilePicture = f.UserId == userId ? f.FriendUser.ProfilePicture : f.User.ProfilePicture,
+                        Age = f.UserId == userId ? f.FriendUser.Age : f.User.Age,
+                        Gender = f.UserId == userId ? f.FriendUser.Gender : f.User.Gender,
+                    })
+                    .ToListAsync();
+
                 response.StatusCode = StatusCodes.Status200OK;
                 response.DisplayMessage = "Success";
                 response.Result = friends;
@@ -105,13 +110,14 @@ namespace Austistic.Infrastructure.Service.Implementation
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex.Message, ex);
-                response.ErrorMessages = new List<string>() { "Error in getting users friend" };
+                _logger.LogError(ex, ex.Message);
+                response.ErrorMessages = new List<string> { "Error in getting user's friends" };
                 response.StatusCode = 501;
                 response.DisplayMessage = "Error";
                 return response;
             }
         }
+
 
         public async Task<ResponseDto<string>> SendFriendRequest(string userId, string friendId)
         {
@@ -121,7 +127,7 @@ namespace Austistic.Infrastructure.Service.Implementation
                 var friendRequest = new Friend
                 {
                     UserId = userId,
-                    FriendId = friendId,
+                    FriendUserId = friendId,
                     Status = FriendStatus.Pending
                 };
 
@@ -143,15 +149,15 @@ namespace Austistic.Infrastructure.Service.Implementation
 
         }
 
-        public async Task<ResponseDto<string>> ApproveFriendRequest(string userId, string friendId, FriendStatus friendStatus)
+        public async Task<ResponseDto<string>> ApproveFriendRequest(string friend_requestId, FriendStatus friendStatus)
         {
             var response = new ResponseDto<string>();
             try
             {
                 var friendRequest = await _context.Friends
-               .FirstOrDefaultAsync(f => f.UserId == userId && f.FriendId == friendId && f.Status == FriendStatus.Pending);
+               .FirstOrDefaultAsync(f => f.Id == friend_requestId && f.Status == FriendStatus.Pending);
 
-                if (friendRequest != null)
+                if (friendRequest == null)
                 {
                     response.ErrorMessages = new List<string>() { "Changing friend status not successfully" };
                     response.StatusCode = 501;
@@ -184,20 +190,19 @@ namespace Austistic.Infrastructure.Service.Implementation
             try
             {
                 var pendingRequests = await _context.Friends
-                .Where(f => f.FriendId == userId && f.Status == FriendStatus.Pending).Select(u => new UserInfo()
+                .Where(f => f.FriendUserId == userId && f.Status == FriendStatus.Pending).Select(u => new UserInfo()
                 {
                     Id = u.Id,
-                    Email = u.FriendUser.Email,
-                    UserName = u.FriendUser.UserName,
-                    FirstName = u.FriendUser.FirstName,
-                    LastName = u.FriendUser.LastName,
-                    Country = u.FriendUser.Country,
-                    PhoneNumber = u.FriendUser.PhoneNumber,
-                    ProfilePicture = u.FriendUser.ProfilePicture,
-                    Age = u.FriendUser.Age,
-                    Gender = u.FriendUser.Gender,
-                })
-                .ToListAsync();
+                    Email = u.User.Email,
+                    UserName = u.User.UserName,
+                    FirstName = u.User.FirstName,
+                    LastName = u.User.LastName,
+                    Country = u.User.Country,
+                    PhoneNumber = u.User.PhoneNumber,
+                    ProfilePicture = u.User.ProfilePicture,
+                    Age = u.User.Age,
+                    Gender = u.User.Gender,
+                }).ToListAsync();
                 response.StatusCode = StatusCodes.Status200OK;
                 response.DisplayMessage = "Success";
                 response.Result = pendingRequests;

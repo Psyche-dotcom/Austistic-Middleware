@@ -6,7 +6,7 @@
         public string UserId { get; set; }
         public ApplicationUser User { get; set; }
 
-        public string FriendId { get; set; }
+        public string FriendUserId { get; set; }
         public ApplicationUser FriendUser { get; set; }
 
         public FriendStatus Status { get; set; }

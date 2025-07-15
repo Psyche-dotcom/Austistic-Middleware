@@ -16,29 +16,7 @@ namespace AlpaStock.Core.Context
         public DbSet<SupportMessage> SupportMessage { get; set; }
         
         public AustisticContext(DbContextOptions options) : base(options) { }
-        protected override void OnModelCreating(ModelBuilder builder)
-        {
-            base.OnModelCreating(builder);
-
-            builder.Entity<Friend>()
-                .HasKey(f => new { f.UserId, f.FriendId });
-
-            builder.Entity<Friend>()
-                .HasOne(f => f.User)
-                .WithMany(u => u.Friends)
-                .HasForeignKey(f => f.UserId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            builder.Entity<Friend>()
-                .HasOne(f => f.FriendUser)
-                .WithMany()
-                .HasForeignKey(f => f.FriendId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            builder.Entity<Friend>()
-                .Property(f => f.Status)
-                .HasDefaultValue(FriendStatus.Pending);
-        }
+     
 
     }
 }

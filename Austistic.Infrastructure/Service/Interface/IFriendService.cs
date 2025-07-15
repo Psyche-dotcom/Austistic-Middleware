@@ -9,7 +9,7 @@ namespace Austistic.Infrastructure.Service.Interface
         Task<ResponseDto<List<UserInfo>>> SuggestFriends(string userId, int limit);
         Task<ResponseDto<List<UserInfo>>> GetFriends(string userId);
         Task<ResponseDto<string>> SendFriendRequest(string userId, string friendId);
-        Task<ResponseDto<string>> ApproveFriendRequest(string userId, string friendId, FriendStatus friendStatus);
+        Task<ResponseDto<string>> ApproveFriendRequest(string friend_requestId, FriendStatus friendStatus);
         Task<ResponseDto<List<UserInfo>>> GetPendingFriendRequests(string userId);
     }
 }

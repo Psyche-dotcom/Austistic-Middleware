@@ -3,6 +3,7 @@ using System;
 using AlpaStock.Core.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Austistic.Core.Migrations
 {
     [DbContext(typeof(AustisticContext))]
-    partial class AustisticContextModelSnapshot : ModelSnapshot
+    [Migration("20250715120517_add friend")]
+    partial class addfriend
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -225,8 +228,11 @@ namespace Austistic.Core.Migrations
                     b.Property<DateTime?>("DateUpdated")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<string>("FriendUserId")
+                    b.Property<string>("FriendId")
                         .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("FriendUserId")
                         .HasColumnType("text");
 
                     b.Property<bool>("IsDeleted")
@@ -530,9 +536,7 @@ namespace Austistic.Core.Migrations
                 {
                     b.HasOne("Austistic.Core.Entities.ApplicationUser", "FriendUser")
                         .WithMany()
-                        .HasForeignKey("FriendUserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("FriendUserId");
 
                     b.HasOne("Austistic.Core.Entities.ApplicationUser", "User")
                         .WithMany()
