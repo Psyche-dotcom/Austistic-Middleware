@@ -26,7 +26,7 @@ namespace Austistic.Infrastructure.Service.Implementation
 
 
 
-        public async Task<ResponseDto<List<UserInfo>>> SuggestFriends(string userId, int limit)
+        public async Task<ResponseDto<List<UserInfo>>> SuggestFriends(string userId, int limit, string filter)
         {
             var response = new ResponseDto<List<UserInfo>>();
             try
@@ -39,6 +39,31 @@ namespace Austistic.Infrastructure.Service.Implementation
 
                 int minAge = user.Age - 5;
                 int maxAge = user.Age + 10;
+                if(string.IsNullOrEmpty(filter))
+                {
+                    var Friendusers = await _context.Users.Where(u=>u.FirstName.Contains(filter)
+                    || u.LastName.Contains(filter) 
+                    || u.UserName.Contains(filter))
+                        .Select(u => new UserInfo
+                    {
+                        Id = u.Id,
+                        Email = u.Email,
+                        UserName = u.UserName,
+                        FirstName = u.FirstName,
+                        LastName = u.LastName,
+                        Country = u.Country,
+                        PhoneNumber = u.PhoneNumber,
+                        ProfilePicture = u.ProfilePicture,
+                        Age = u.Age,
+                        Gender = u.Gender,
+                    })
+                    .Take(limit)
+                    .ToListAsync();
+                    response.StatusCode = StatusCodes.Status200OK;
+                    response.DisplayMessage = "Success";
+                    response.Result = Friendusers;
+                    return response;
+                }
 
                 var suggestedFriends = await _context.Users
                     .Where(u => u.Id != userId &&

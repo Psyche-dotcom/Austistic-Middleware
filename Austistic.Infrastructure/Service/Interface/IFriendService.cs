@@ -6,7 +6,7 @@ namespace Austistic.Infrastructure.Service.Interface
 {
     public interface IFriendService
     {
-        Task<ResponseDto<List<UserInfo>>> SuggestFriends(string userId, int limit);
+        Task<ResponseDto<List<UserInfo>>> SuggestFriends(string userId, int limit, string filter);
         Task<ResponseDto<List<UserInfo>>> GetFriends(string userId);
         Task<ResponseDto<string>> SendFriendRequest(string userId, string friendId);
         Task<ResponseDto<string>> ApproveFriendRequest(string friend_requestId, FriendStatus friendStatus);
