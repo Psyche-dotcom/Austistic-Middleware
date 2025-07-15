@@ -115,7 +115,8 @@ namespace Austistic.Infrastructure.Service.Implementation
                         (f.FriendUserId == userId && f.Status == FriendStatus.Approved))
                     .Select(f => new UserInfo
                     {
-                        Id = f.UserId == userId ? f.FriendUser.Id : f.User.Id,
+                        Id = f.Id,
+                        UserId = f.UserId == userId ? f.FriendUser.Id : f.User.Id,
                         Email = f.UserId == userId ? f.FriendUser.Email : f.User.Email,
                         UserName = f.UserId == userId ? f.FriendUser.UserName : f.User.UserName,
                         FirstName = f.UserId == userId ? f.FriendUser.FirstName : f.User.FirstName,
@@ -156,6 +157,7 @@ namespace Austistic.Infrastructure.Service.Implementation
                              )
                            .Select(f => new UserInfo
                            {
+                               UserId=f.FriendUser.Id,
                                Id =  f.Id ,
                                Email =  f.FriendUser.Email,
                                UserName =  f.FriendUser.UserName ,
@@ -183,6 +185,7 @@ namespace Austistic.Infrastructure.Service.Implementation
                            .Select(f => new UserInfo
                            {
                                Id = f.Id,
+                               UserId = f.User.Id,
                                Email = f.User.Email,
                                UserName = f.User.UserName,
                                FirstName = f.User.FirstName,
@@ -286,6 +289,7 @@ namespace Austistic.Infrastructure.Service.Implementation
                 .Where(f => f.FriendUserId == userId && f.Status == FriendStatus.Pending).Select(u => new UserInfo()
                 {
                     Id = u.Id,
+                    UserId = u.UserId,
                     Email = u.User.Email,
                     UserName = u.User.UserName,
                     FirstName = u.User.FirstName,

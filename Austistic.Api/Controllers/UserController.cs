@@ -111,6 +111,24 @@ namespace Austistic.Api.Controllers
                 return BadRequest(result);
             }
         }
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [HttpGet("user/id/info")]
+        public async Task<IActionResult> UserInfoByUserIdAsync(string userid)
+        {
+            var result = await _accountService.UserInfoAsync(userid);
+            if (result.StatusCode == 200)
+            {
+                return Ok(result);
+            }
+            else if (result.StatusCode == 404)
+            {
+                return NotFound(result);
+            }
+            else
+            {
+                return BadRequest(result);
+            }
+        }
         [HttpPatch("update_role/{email}")]
         public async Task<IActionResult> UpdateUserRoleAsync(string email, string role)
         {
