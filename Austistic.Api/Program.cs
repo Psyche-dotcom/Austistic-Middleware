@@ -1,5 +1,6 @@
 using AlpaStock.Api.Extension;
 using Austistic.Api.Seed;
+using Austistic.Infrastructure.Service.Implementation;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,6 +20,7 @@ app.UseSwagger();
     app.UseSwaggerUI();
 /*}*/
 app.UseCors();
+app.MapHub<ChatHub>("/chathub");
 app.UseHttpsRedirection();
 
 app.UseAuthorization();

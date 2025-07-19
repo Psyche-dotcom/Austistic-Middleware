@@ -7,7 +7,6 @@ using Austistic.Infrastructure.Service.Interface;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using System.Threading.Channels;
 
 namespace Austistic.Infrastructure.Service.Implementation
 {
@@ -18,7 +17,7 @@ namespace Austistic.Infrastructure.Service.Implementation
         private readonly ILogger<FriendService> _logger;
         private readonly IHelper _helper;
 
-        public FriendService(AustisticContext context, 
+        public FriendService(AustisticContext context,
             ILogger<FriendService> logger, IHelper helper)
         {
 
@@ -42,24 +41,24 @@ namespace Austistic.Infrastructure.Service.Implementation
 
                 int minAge = user.Age - 5;
                 int maxAge = user.Age + 10;
-                if(!string.IsNullOrEmpty(filter))
+                if (!string.IsNullOrEmpty(filter))
                 {
-                    var Friendusers = await _context.Users.Where(u=>u.FirstName.Contains(filter)
-                    || u.LastName.Contains(filter) 
+                    var Friendusers = await _context.Users.Where(u => u.FirstName.Contains(filter)
+                    || u.LastName.Contains(filter)
                     || u.UserName.Contains(filter))
                         .Select(u => new UserInfo
-                    {
-                        Id = u.Id,
-                        Email = u.Email,
-                        UserName = u.UserName,
-                        FirstName = u.FirstName,
-                        LastName = u.LastName,
-                        Country = u.Country,
-                        PhoneNumber = u.PhoneNumber,
-                        ProfilePicture = u.ProfilePicture,
-                        Age = u.Age,
-                        Gender = u.Gender,
-                    })
+                        {
+                            Id = u.Id,
+                            Email = u.Email,
+                            UserName = u.UserName,
+                            FirstName = u.FirstName,
+                            LastName = u.LastName,
+                            Country = u.Country,
+                            PhoneNumber = u.PhoneNumber,
+                            ProfilePicture = u.ProfilePicture,
+                            Age = u.Age,
+                            Gender = u.Gender,
+                        })
                     .Take(limit)
                     .ToListAsync();
                     response.StatusCode = StatusCodes.Status200OK;
@@ -160,11 +159,11 @@ namespace Austistic.Infrastructure.Service.Implementation
                         chatRooomName = f.Room.RoomName,
                         UserId = f.UserId == userId ? f.FriendUser.Id : f.User.Id,
                         name = f.UserId == userId ? f.FriendUser.FirstName + " " + f.FriendUser.LastName : f.User.FirstName + " " + f.User.LastName,
-                        message = f.Room.Messages.OrderByDescending(u=>u.Created).FirstOrDefault().DisplayMessage,
-                        time = f.Room.Messages.OrderByDescending(u=>u.Created).FirstOrDefault().Created.ToShortTimeString(),
-                        unreadCount =  f.Room.Messages.Count(msg => msg.SentById != userId && !msg.ReadCount.Any(read => read.UserId == userId)),
+                        message = f.Room.Messages.OrderByDescending(u => u.Created).FirstOrDefault().DisplayMessage,
+                        time = f.Room.Messages.OrderByDescending(u => u.Created).FirstOrDefault().Created.ToShortTimeString(),
+                        unreadCount = f.Room.Messages.Count(msg => msg.SentById != userId && !msg.ReadCount.Any(read => read.UserId == userId)),
                         url = f.UserId == userId ? f.FriendUser.ProfilePicture : f.User.ProfilePicture,
-                       
+
                     }).ToListAsync();
 
                 response.StatusCode = StatusCodes.Status200OK;
@@ -187,7 +186,7 @@ namespace Austistic.Infrastructure.Service.Implementation
             try
             {
                 var room = await _context.Rooms.FirstOrDefaultAsync(u => u.RoomName == RoomName);
-                if(room == null)
+                if (room == null)
                 {
                     response.ErrorMessages = new List<string>() { "Invalid room name" };
                     response.StatusCode = 400;
@@ -200,10 +199,10 @@ namespace Austistic.Infrastructure.Service.Implementation
                     isMe = userId == m.SentById,
                     text = m.DisplayMessage,
                     time = m.Created.ToShortTimeString(),
-                    status =m.SentById == userId ||  m.ReadCount.FirstOrDefault(msg=>msg.UserId == userId) != null ?"Read":"UnRead"
+                    status = m.SentById == userId || m.ReadCount.FirstOrDefault(msg => msg.UserId == userId) != null ? "Read" : "UnRead"
 
                 }).ToListAsync();
-                  
+
 
                 response.StatusCode = StatusCodes.Status200OK;
                 response.DisplayMessage = "Success";
@@ -224,26 +223,27 @@ namespace Austistic.Infrastructure.Service.Implementation
             var response = new ResponseDto<List<UserInfo>>();
             try
             {
-                if(type == "sent") {
+                if (type == "sent")
+                {
 
 
                     var friends = await _context.Friends
                            .Where(f =>
-                               (f.UserId == userId && f.Status == FriendStatus.Pending) 
+                               (f.UserId == userId && f.Status == FriendStatus.Pending)
                              )
                            .Select(f => new UserInfo
                            {
-                               UserId=f.FriendUser.Id,
-                               Id =  f.Id ,
-                               Email =  f.FriendUser.Email,
-                               UserName =  f.FriendUser.UserName ,
+                               UserId = f.FriendUser.Id,
+                               Id = f.Id,
+                               Email = f.FriendUser.Email,
+                               UserName = f.FriendUser.UserName,
                                FirstName = f.FriendUser.FirstName,
-                               LastName =  f.FriendUser.LastName ,
-                               Country =  f.FriendUser.Country ,
-                               PhoneNumber = f.FriendUser.PhoneNumber ,
-                               ProfilePicture =  f.FriendUser.ProfilePicture,
-                               Age = f.FriendUser.Age ,
-                               Gender =  f.FriendUser.Gender,
+                               LastName = f.FriendUser.LastName,
+                               Country = f.FriendUser.Country,
+                               PhoneNumber = f.FriendUser.PhoneNumber,
+                               ProfilePicture = f.FriendUser.ProfilePicture,
+                               Age = f.FriendUser.Age,
+                               Gender = f.FriendUser.Gender,
                            })
                            .ToListAsync();
 
@@ -320,6 +320,46 @@ namespace Austistic.Infrastructure.Service.Implementation
             }
 
         }
+        public async Task<ResponseDto<RoomMessages>> AddMessage(string userId, string roomName,string plainMessageText, string mainMessage)
+        {
+            var response = new ResponseDto<RoomMessages>();
+            try
+            {
+                var room = await _context.Rooms.FirstOrDefaultAsync(u => u.RoomName == roomName);
+                if (room == null)
+                {
+                    response.ErrorMessages = new List<string>() { "Invalid room name" };
+                    response.StatusCode = 400;
+                    response.DisplayMessage = "Error";
+                    return response;
+                }
+                ;
+                var msgRequest = new RoomMessages
+                {
+                    SentById = userId,
+                    DisplayMessage = plainMessageText,
+                    MessageType = "Text",
+                    Message = mainMessage,
+                    RoomId = room.Id
+                };
+
+              await _context.RoomMessages.AddAsync(msgRequest);
+                await _context.SaveChangesAsync();
+                response.StatusCode = StatusCodes.Status200OK;
+                response.DisplayMessage = "Success";
+                response.Result = msgRequest;
+                return response;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message, ex);
+                response.ErrorMessages = new List<string>() { "Error in saving message successfully" };
+                response.StatusCode = 501;
+                response.DisplayMessage = "Error";
+                return response;
+            }
+
+        }
 
         public async Task<ResponseDto<string>> ApproveFriendRequest(string friend_requestId, FriendStatus friendStatus)
         {
@@ -336,7 +376,7 @@ namespace Austistic.Infrastructure.Service.Implementation
                     response.DisplayMessage = "Error";
                     return response;
                 }
-                if(friendStatus == FriendStatus.Approved)
+                if (friendStatus == FriendStatus.Approved)
                 {
                     var roomname = _helper.GenerateSecureRandomAlphanumeric(10);
                     await _context.Rooms.AddAsync(new Room()
@@ -378,7 +418,7 @@ namespace Austistic.Infrastructure.Service.Implementation
                     response.DisplayMessage = "Error";
                     return response;
                 }
-               var friendRoom =  await _context.Rooms.FirstOrDefaultAsync(u=>u.FriendId == friend_requestId);
+                var friendRoom = await _context.Rooms.FirstOrDefaultAsync(u => u.FriendId == friend_requestId);
                 _context.Rooms.Remove(friendRoom);
                 _context.Friends.Remove(friendRequest);
                 _context.SaveChanges();

@@ -17,11 +17,13 @@ namespace AlpaStock.Api.Extension
 
             services.AddCors(options =>
             {
-                options.AddDefaultPolicy(builder =>
+                options.AddDefaultPolicy(policy =>
                 {
-                    builder.AllowAnyMethod();
-                    builder.AllowAnyOrigin();
-                    builder.AllowAnyHeader();
+                    policy
+                        .AllowAnyMethod()
+                        .AllowAnyHeader()
+                        .SetIsOriginAllowed(origin => true) // Allow all origins dynamically
+                        .AllowCredentials(); // Allow cookies, auth headers
                 });
             });
 

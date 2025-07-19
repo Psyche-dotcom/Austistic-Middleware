@@ -26,6 +26,7 @@ namespace AlpaStock.Api.Extension
             services.AddScoped<IFriendService, FriendService>();
             services.AddAutoMapper(typeof(ProjectProfile));
             services.AddHttpClient();
+            services.AddSignalR();
         }
     }
 }
