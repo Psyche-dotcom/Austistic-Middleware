@@ -1,11 +1,13 @@
 ﻿using AlpaStock.Core.Context;
 using AlpaStock.Core.DTOs;
 using Austistic.Core.DTOs.Response.Auth;
+using Austistic.Core.DTOs.Response.Friend;
 using Austistic.Core.Entities;
 using Austistic.Infrastructure.Service.Interface;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using System.Threading.Channels;
 
 namespace Austistic.Infrastructure.Service.Implementation
 {
@@ -14,14 +16,15 @@ namespace Austistic.Infrastructure.Service.Implementation
 
         private readonly AustisticContext _context;
         private readonly ILogger<FriendService> _logger;
-
+        private readonly IHelper _helper;
 
         public FriendService(AustisticContext context, 
-            ILogger<FriendService> logger)
+            ILogger<FriendService> logger, IHelper helper)
         {
 
             _context = context;
             _logger = logger;
+            _helper = helper;
         }
 
 
@@ -138,6 +141,79 @@ namespace Austistic.Infrastructure.Service.Implementation
             {
                 _logger.LogError(ex, ex.Message);
                 response.ErrorMessages = new List<string> { "Error in getting user's friends" };
+                response.StatusCode = 501;
+                response.DisplayMessage = "Error";
+                return response;
+            }
+        }
+        public async Task<ResponseDto<List<GetAllFriendResp>>> GetAllActiveFriends(string userId)
+        {
+            var response = new ResponseDto<List<GetAllFriendResp>>();
+            try
+            {
+                var friends = await _context.Friends
+                    .Where(f =>
+                        (f.UserId == userId && f.Status == FriendStatus.Approved) ||
+                        (f.FriendUserId == userId && f.Status == FriendStatus.Approved))
+                    .Select(f => new GetAllFriendResp
+                    {
+                        chatRooomName = f.Room.RoomName,
+                        UserId = f.UserId == userId ? f.FriendUser.Id : f.User.Id,
+                        name = f.UserId == userId ? f.FriendUser.FirstName + " " + f.FriendUser.LastName : f.User.FirstName + " " + f.User.LastName,
+                        message = f.Room.Messages.OrderByDescending(u=>u.Created).FirstOrDefault().DisplayMessage,
+                        time = f.Room.Messages.OrderByDescending(u=>u.Created).FirstOrDefault().Created.ToShortTimeString(),
+                        unreadCount =  f.Room.Messages.Count(msg => msg.SentById != userId && !msg.ReadCount.Any(read => read.UserId == userId)),
+                        url = f.UserId == userId ? f.FriendUser.ProfilePicture : f.User.ProfilePicture,
+                       
+                    }).ToListAsync();
+
+                response.StatusCode = StatusCodes.Status200OK;
+                response.DisplayMessage = "Success";
+                response.Result = friends;
+                return response;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
+                response.ErrorMessages = new List<string> { "Error in getting user's friends" };
+                response.StatusCode = 501;
+                response.DisplayMessage = "Error";
+                return response;
+            }
+        }
+        public async Task<ResponseDto<List<RoomMessageResp>>> GetRoomMessage(string userId, string RoomName)
+        {
+            var response = new ResponseDto<List<RoomMessageResp>>();
+            try
+            {
+                var room = await _context.Rooms.FirstOrDefaultAsync(u => u.RoomName == RoomName);
+                if(room == null)
+                {
+                    response.ErrorMessages = new List<string>() { "Invalid room name" };
+                    response.StatusCode = 400;
+                    response.DisplayMessage = "Error";
+                    return response;
+                };
+                var retrieveMessages = await _context.RoomMessages.Where(u => u.RoomId == room.Id).Select(m => new RoomMessageResp
+                {
+                    imageUrl = m.Message,
+                    isMe = userId == m.SentById,
+                    text = m.DisplayMessage,
+                    time = m.Created.ToShortTimeString(),
+                    status =m.SentById == userId ||  m.ReadCount.FirstOrDefault(msg=>msg.UserId == userId) != null ?"Read":"UnRead"
+
+                }).ToListAsync();
+                  
+
+                response.StatusCode = StatusCodes.Status200OK;
+                response.DisplayMessage = "Success";
+                response.Result = retrieveMessages;
+                return response;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
+                response.ErrorMessages = new List<string> { "Error in getting user's messages" };
                 response.StatusCode = 501;
                 response.DisplayMessage = "Error";
                 return response;
@@ -260,6 +336,15 @@ namespace Austistic.Infrastructure.Service.Implementation
                     response.DisplayMessage = "Error";
                     return response;
                 }
+                if(friendStatus == FriendStatus.Approved)
+                {
+                    var roomname = _helper.GenerateSecureRandomAlphanumeric(10);
+                    await _context.Rooms.AddAsync(new Room()
+                    {
+                        FriendId = friend_requestId,
+                        RoomName = roomname
+                    });
+                }
                 friendRequest.Status = friendStatus;
                 _context.Friends.Update(friendRequest);
                 _context.SaveChanges();
@@ -284,16 +369,17 @@ namespace Austistic.Infrastructure.Service.Implementation
             try
             {
                 var friendRequest = await _context.Friends
-               .FirstOrDefaultAsync(f => f.Id == friend_requestId && f.Status == FriendStatus.Pending);
+               .FirstOrDefaultAsync(f => f.Id == friend_requestId);
 
                 if (friendRequest == null)
                 {
-                    response.ErrorMessages = new List<string>() { "Changing friend status not successfully" };
+                    response.ErrorMessages = new List<string>() { "Delete friend not successfully" };
                     response.StatusCode = 501;
                     response.DisplayMessage = "Error";
                     return response;
                 }
-               
+               var friendRoom =  await _context.Rooms.FirstOrDefaultAsync(u=>u.FriendId == friend_requestId);
+                _context.Rooms.Remove(friendRoom);
                 _context.Friends.Remove(friendRequest);
                 _context.SaveChanges();
                 response.StatusCode = StatusCodes.Status200OK;

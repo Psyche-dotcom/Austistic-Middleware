@@ -5,7 +5,7 @@
     {
         public string UserId { get; set; }
         public ApplicationUser User { get; set; }
-
+        public Room Room { get; set; }
         public string FriendUserId { get; set; }
         public ApplicationUser FriendUser { get; set; }
 

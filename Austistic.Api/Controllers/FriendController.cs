@@ -57,6 +57,44 @@ namespace Austistic.Api.Controllers
             }
         }
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [HttpGet("active/current")]
+        public async Task<IActionResult> GetActiveFriends()
+        {
+            var userid = User.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Jti)?.Value;
+            var result = await _friendService.GetAllActiveFriends(userid);
+            if (result.StatusCode == 200)
+            {
+                return Ok(result);
+            }
+            else if (result.StatusCode == 404)
+            {
+                return NotFound(result);
+            }
+            else
+            {
+                return BadRequest(result);
+            }
+        }
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [HttpGet("room/messages")]
+        public async Task<IActionResult> GetRoomMessage(string roomId)
+        {
+            var userid = User.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Jti)?.Value;
+            var result = await _friendService.GetRoomMessage(userid,roomId);
+            if (result.StatusCode == 200)
+            {
+                return Ok(result);
+            }
+            else if (result.StatusCode == 404)
+            {
+                return NotFound(result);
+            }
+            else
+            {
+                return BadRequest(result);
+            }
+        }
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpGet("friend_request/sent/receive")]
         public async Task<IActionResult> GetFriendRequentAndSent(string type)
         {

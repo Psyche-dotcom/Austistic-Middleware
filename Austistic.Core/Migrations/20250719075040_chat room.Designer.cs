@@ -3,6 +3,7 @@ using System;
 using AlpaStock.Core.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Austistic.Core.Migrations
 {
     [DbContext(typeof(AustisticContext))]
-    partial class AustisticContextModelSnapshot : ModelSnapshot
+    [Migration("20250719075040_chat room")]
+    partial class chatroom
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -248,41 +251,6 @@ namespace Austistic.Core.Migrations
                     b.ToTable("Friends");
                 });
 
-            modelBuilder.Entity("Austistic.Core.Entities.ReadMassageCount", b =>
-                {
-                    b.Property<string>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("Created")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime?>("DateUpdated")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("boolean");
-
-                    b.Property<string>("MessageId")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("ReadAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("MessageId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("ReadMassageCount");
-                });
-
             modelBuilder.Entity("Austistic.Core.Entities.Room", b =>
                 {
                     b.Property<string>("Id")
@@ -308,8 +276,7 @@ namespace Austistic.Core.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("FriendId")
-                        .IsUnique();
+                    b.HasIndex("FriendId");
 
                     b.ToTable("Rooms");
                 });
@@ -325,10 +292,6 @@ namespace Austistic.Core.Migrations
 
                     b.Property<DateTime?>("DateUpdated")
                         .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("DisplayMessage")
-                        .IsRequired()
-                        .HasColumnType("text");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean");
@@ -655,30 +618,11 @@ namespace Austistic.Core.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Austistic.Core.Entities.ReadMassageCount", b =>
-                {
-                    b.HasOne("Austistic.Core.Entities.RoomMessages", "Message")
-                        .WithMany("ReadCount")
-                        .HasForeignKey("MessageId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Austistic.Core.Entities.ApplicationUser", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Message");
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("Austistic.Core.Entities.Room", b =>
                 {
                     b.HasOne("Austistic.Core.Entities.Friend", "Friend")
-                        .WithOne("Room")
-                        .HasForeignKey("Austistic.Core.Entities.Room", "FriendId")
+                        .WithMany()
+                        .HasForeignKey("FriendId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -688,7 +632,7 @@ namespace Austistic.Core.Migrations
             modelBuilder.Entity("Austistic.Core.Entities.RoomMessages", b =>
                 {
                     b.HasOne("Austistic.Core.Entities.Room", "Room")
-                        .WithMany("Messages")
+                        .WithMany()
                         .HasForeignKey("RoomId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -800,22 +744,6 @@ namespace Austistic.Core.Migrations
             modelBuilder.Entity("Austistic.Core.Entities.CategorySymbol", b =>
                 {
                     b.Navigation("SymbolImages");
-                });
-
-            modelBuilder.Entity("Austistic.Core.Entities.Friend", b =>
-                {
-                    b.Navigation("Room")
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("Austistic.Core.Entities.Room", b =>
-                {
-                    b.Navigation("Messages");
-                });
-
-            modelBuilder.Entity("Austistic.Core.Entities.RoomMessages", b =>
-                {
-                    b.Navigation("ReadCount");
                 });
 
             modelBuilder.Entity("Austistic.Core.Entities.SupportTicket", b =>

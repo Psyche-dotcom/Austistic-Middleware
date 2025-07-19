@@ -14,6 +14,9 @@ namespace AlpaStock.Core.Context
         public DbSet<CategorySymbol> CategorySymbol { get; set; }
         public DbSet<SupportTicket> SupportTicket { get; set; }
         public DbSet<SupportMessage> SupportMessage { get; set; }
+        public DbSet<Room> Rooms { get; set; }
+        public DbSet<RoomMessages> RoomMessages { get; set; }
+        public DbSet<ReadMassageCount> ReadMassageCount { get; set; }
         
         public AustisticContext(DbContextOptions options) : base(options) { }
      
