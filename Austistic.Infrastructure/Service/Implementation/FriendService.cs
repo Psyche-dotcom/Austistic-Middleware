@@ -419,7 +419,11 @@ namespace Austistic.Infrastructure.Service.Implementation
                     return response;
                 }
                 var friendRoom = await _context.Rooms.FirstOrDefaultAsync(u => u.FriendId == friend_requestId);
-                _context.Rooms.Remove(friendRoom);
+                if(friendRoom != null)
+                {
+                    _context.Rooms.Remove(friendRoom);
+                }
+               
                 _context.Friends.Remove(friendRequest);
                 _context.SaveChanges();
                 response.StatusCode = StatusCodes.Status200OK;
