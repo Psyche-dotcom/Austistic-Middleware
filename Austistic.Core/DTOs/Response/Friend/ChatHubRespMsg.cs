@@ -7,5 +7,6 @@
         public string status { get; set; }
         public string imageUrl { get; set; }
         public string userId { get; set; }
+        public string roomName { get; set; }
     }
 }

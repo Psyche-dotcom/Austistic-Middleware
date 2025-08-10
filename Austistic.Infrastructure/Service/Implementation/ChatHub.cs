@@ -31,6 +31,7 @@ namespace Austistic.Infrastructure.Service.Implementation
                 userId = userId,
                 text = plainMessage,
                 status = "Unread",
+                roomName = roomName,
                 time = addMessage.Result.Created.ToShortTimeString()
             };
             await Clients.Group(roomName).SendAsync("ReceiveMessage", userId, newMsg);
