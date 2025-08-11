@@ -107,7 +107,7 @@ namespace Austistic.Infrastructure.Service.Implementation
                     return response;
                 }
                 var message = new Message(new string[] { createUser.Email }, "Confirm Email Token", $"<p>Your confirm email code is below<p><h6>{GenerateConfirmEmailToken.Token}</h6>");
-                _emailServices.SendEmail(message);
+               // _emailServices.SendEmail(message);
 
                 response.StatusCode = StatusCodes.Status200OK;
                 response.DisplayMessage = "Successful";
@@ -280,14 +280,7 @@ namespace Austistic.Infrastructure.Service.Implementation
                     response.DisplayMessage = "Error";
                     return response;
                 }
-                if (!checkUserExist.EmailConfirmed)
-                {
-                    response.ErrorMessages = new List<string>() { "Please confirm your email address" };
-                    response.StatusCode = 400;
-                    response.DisplayMessage = "Error";
-                    return response;
-
-                }
+               
                 var generateToken = await _generateJwt.GenerateToken(checkUserExist);
                 if (generateToken == null)
                 {
