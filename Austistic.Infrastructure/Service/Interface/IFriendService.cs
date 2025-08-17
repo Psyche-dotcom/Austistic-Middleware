@@ -14,7 +14,7 @@ namespace Austistic.Infrastructure.Service.Interface
         Task<ResponseDto<List<GetAllFriendResp>>> GetAllActiveFriends(string userId);
         Task<ResponseDto<string>> ApproveFriendRequest(string friend_requestId, FriendStatus friendStatus);
         Task<ResponseDto<List<UserInfo>>> GetPendingFriendRequests(string userId);
-        Task<ResponseDto<List<UserInfo>>> GetSentAndReceiveFriends(string userId, string type);
+        Task<ResponseDto<List<UserInfo>>> GetSentAndReceiveFriends(string userId, string type, string filter);
         Task<ResponseDto<string>> DeleteFriendRequest(string friend_requestId);
         Task<ResponseDto<List<RoomMessageResp>>> GetRoomMessage(string userId, string RoomName);
         Task<ResponseDto<RoomMessages>> AddMessage(string userId, string roomName, string plainMessageText, string mainMessage);

@@ -7,6 +7,7 @@ using Austistic.Infrastructure.Service.Interface;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.Tokens;
 
 namespace Austistic.Infrastructure.Service.Implementation
 {
@@ -244,7 +245,7 @@ namespace Austistic.Infrastructure.Service.Implementation
             }
         }
 
-        public async Task<ResponseDto<List<UserInfo>>> GetSentAndReceiveFriends(string userId, string type)
+        public async Task<ResponseDto<List<UserInfo>>> GetSentAndReceiveFriends(string userId, string type,  string? filter)
         {
             var response = new ResponseDto<List<UserInfo>>();
             try
@@ -253,7 +254,7 @@ namespace Austistic.Infrastructure.Service.Implementation
                 {
 
 
-                    var friends = await _context.Friends
+                    var friends = _context.Friends
                            .Where(f =>
                                (f.UserId == userId && f.Status == FriendStatus.Pending)
                              )
@@ -270,17 +271,22 @@ namespace Austistic.Infrastructure.Service.Implementation
                                ProfilePicture = f.FriendUser.ProfilePicture,
                                Age = f.FriendUser.Age,
                                Gender = f.FriendUser.Gender,
-                           })
-                           .ToListAsync();
+                           });
+                           if (!filter.IsNullOrEmpty())
+                    {
+                        friends= friends.Where(u => (u.FirstName.Contains(filter)
+                    || u.LastName.Contains(filter)
+                    || u.UserName.Contains(filter)));
+                    }
 
                     response.StatusCode = StatusCodes.Status200OK;
                     response.DisplayMessage = "Success";
-                    response.Result = friends;
+                    response.Result = await friends.ToListAsync();
                     return response;
 
 
                 }
-                var friendReq = await _context.Friends
+                var friendReq = _context.Friends
                            .Where(f =>
                                (f.FriendUserId == userId && f.Status == FriendStatus.Pending)
                              )
@@ -297,12 +303,18 @@ namespace Austistic.Infrastructure.Service.Implementation
                                ProfilePicture = f.User.ProfilePicture,
                                Age = f.User.Age,
                                Gender = f.User.Gender,
-                           })
-                           .ToListAsync();
+                           });
+                if (!filter.IsNullOrEmpty())
+                {
+                    friendReq = friendReq.Where(u => (u.FirstName.Contains(filter)
+                || u.LastName.Contains(filter)
+                || u.UserName.Contains(filter)));
+                }
+
 
                 response.StatusCode = StatusCodes.Status200OK;
                 response.DisplayMessage = "Success";
-                response.Result = friendReq;
+                response.Result = await friendReq.ToListAsync();
                 return response;
 
             }

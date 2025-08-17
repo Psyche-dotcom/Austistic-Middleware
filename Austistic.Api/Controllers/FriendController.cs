@@ -115,10 +115,10 @@ namespace Austistic.Api.Controllers
         }
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpGet("friend_request/sent/receive")]
-        public async Task<IActionResult> GetFriendRequentAndSent(string type)
+        public async Task<IActionResult> GetFriendRequentAndSent(string type, string? filter)
         {
             var userid = User.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Jti)?.Value;
-            var result = await _friendService.GetSentAndReceiveFriends(userid, type);
+            var result = await _friendService.GetSentAndReceiveFriends(userid, type, filter);
             if (result.StatusCode == 200)
             {
                 return Ok(result);
