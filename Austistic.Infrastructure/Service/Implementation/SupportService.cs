@@ -82,7 +82,7 @@ namespace Austistic.Infrastructure.Service.Implementation
                 {
                     IsAdmin = IsAdmin,
                     Message = Message,
-                    SupportTicketId = ticketid,
+                    SupportTicketId = checkTicket.Id,
                 });
                 await _supportTicketRepo.SaveChanges();
 
