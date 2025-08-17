@@ -146,7 +146,7 @@ namespace Austistic.Infrastructure.Service.Implementation
             {
                 var checkTicket = await _supportTicketRepo.GetQueryable()
                     .Include(u => u.SupportMessages).
-                    Where(u => u.Id == userid).ToListAsync();
+                    Where(u => u.UserId == userid).ToListAsync();
 
                 await _supportTicketRepo.SaveChanges();
 
