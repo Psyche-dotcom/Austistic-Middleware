@@ -9,6 +9,7 @@ namespace AlpaStock.Infrastructure.Service.Interface
 {
     public interface IAccountService
     {
+        Task<ResponseDto<string>> ToggleUserShouldShow(string userId);
         Task<ResponseDto<string>> RegisterAdmin(SignUp signUp);
         Task<ResponseDto<string>> UploadUserProfilePicture(string email, IFormFile file);
         Task<ResponseDto<string>> UpdateUser(string email, UpdateUserDto updateUser);

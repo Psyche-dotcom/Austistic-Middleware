@@ -11,7 +11,7 @@ namespace Austistic.Core.Entities
         public string? ProfilePicture { get; set; }
         public int Age { get; set; }
         public string Gender { get; set; }
-     
+        public bool ShouldShowOnSearch { get; set; } = true;
         public ConfirmEmailToken ConfirmEmailToken { get; set; }
         public ForgetPasswordToken ForgetPasswordToken { get; set; }
         public DateTime Created { get; set; } = DateTime.UtcNow;

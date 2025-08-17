@@ -112,6 +112,26 @@ namespace Austistic.Api.Controllers
             }
         }
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [HttpGet("user/search/toggle")]
+        public async Task<IActionResult> ToggleSearch()
+        {
+            var userid = User.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Jti)?.Value;
+
+            var result = await _accountService.ToggleUserShouldShow(userid);
+            if (result.StatusCode == 200)
+            {
+                return Ok(result);
+            }
+            else if (result.StatusCode == 404)
+            {
+                return NotFound(result);
+            }
+            else
+            {
+                return BadRequest(result);
+            }
+        }
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpGet("user/id/info")]
         public async Task<IActionResult> UserInfoByUserIdAsync(string userid)
         {

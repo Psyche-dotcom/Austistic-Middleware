@@ -43,9 +43,9 @@ namespace Austistic.Infrastructure.Service.Implementation
                 int maxAge = user.Age + 10;
                 if (!string.IsNullOrEmpty(filter))
                 {
-                    var Friendusers = await _context.Users.Where(u => u.FirstName.Contains(filter)
+                    var Friendusers = await _context.Users.Where(u => (u.FirstName.Contains(filter)
                     || u.LastName.Contains(filter)
-                    || u.UserName.Contains(filter))
+                    || u.UserName.Contains(filter)) && u.ShouldShowOnSearch)
                         .Select(u => new UserInfo
                         {
                             Id = u.Id,
@@ -69,6 +69,7 @@ namespace Austistic.Infrastructure.Service.Implementation
 
                 var suggestedFriends = await _context.Users
                     .Where(u => u.Id != userId &&
+                     u.ShouldShowOnSearch &&
                                 u.Age >= minAge &&
                                 u.Age <= maxAge &&
                                 !_context.Friends.Any(f =>
@@ -192,17 +193,41 @@ namespace Austistic.Infrastructure.Service.Implementation
                     response.StatusCode = 400;
                     response.DisplayMessage = "Error";
                     return response;
-                };
-                var retrieveMessages = await _context.RoomMessages.Where(u => u.RoomId == room.Id).Select(m => new RoomMessageResp
+                }
+
+                // Get all messages in the room
+                var roomMessages = await _context.RoomMessages
+                    .Include(m => m.ReadCount) // include read status
+                    .Where(u => u.RoomId == room.Id)
+                    .ToListAsync();
+
+                // Mark messages as read for this user (if not already)
+                var unreadMessages = roomMessages
+                    .Where(m => !m.ReadCount.Any(rc => rc.UserId == userId)) // not read by this user yet
+                    .ToList();
+
+                if (unreadMessages.Any())
+                {
+                    var readEntries = unreadMessages.Select(m => new ReadMassageCount
+                    {
+                        MessageId = m.Id,   // from BaseEntity
+                        UserId = userId,
+                        ReadAt = DateTime.UtcNow
+                    }).ToList();
+
+                    await _context.ReadMassageCount.AddRangeAsync(readEntries);
+                    await _context.SaveChangesAsync();
+                }
+
+                // Map to DTO
+                var retrieveMessages = roomMessages.Select(m => new RoomMessageResp
                 {
                     imageUrl = m.Message,
                     isMe = userId == m.SentById,
                     text = m.DisplayMessage,
                     time = m.Created.ToShortTimeString(),
-                    status = m.SentById == userId || m.ReadCount.FirstOrDefault(msg => msg.UserId == userId) != null ? "Read" : "UnRead"
-
-                }).ToListAsync();
-
+                    status = m.SentById == userId || m.ReadCount.Any(rc => rc.UserId == userId) ? "Read" : "UnRead"
+                }).ToList();
 
                 response.StatusCode = StatusCodes.Status200OK;
                 response.DisplayMessage = "Success";
@@ -218,6 +243,7 @@ namespace Austistic.Infrastructure.Service.Implementation
                 return response;
             }
         }
+
         public async Task<ResponseDto<List<UserInfo>>> GetSentAndReceiveFriends(string userId, string type)
         {
             var response = new ResponseDto<List<UserInfo>>();
@@ -296,6 +322,22 @@ namespace Austistic.Infrastructure.Service.Implementation
             var response = new ResponseDto<string>();
             try
             {
+                var existingFriendship = await _context.Friends.FirstOrDefaultAsync(f =>
+    (f.UserId == userId && f.FriendUserId == friendId) ||
+    (f.UserId == friendId && f.FriendUserId == userId));
+                if (existingFriendship != null)
+                {
+                    response.StatusCode = StatusCodes.Status400BadRequest;
+                    response.DisplayMessage = "Error";
+                    response.ErrorMessages = new List<string>
+            {
+                existingFriendship.Status == FriendStatus.Pending
+                    ? "A friend request is already pending between you and this user."
+                    : "You are already friends with this user."
+            };
+                    return response;
+                }
+
                 var friendRequest = new Friend
                 {
                     UserId = userId,
@@ -320,7 +362,7 @@ namespace Austistic.Infrastructure.Service.Implementation
             }
 
         }
-        public async Task<ResponseDto<RoomMessages>> AddMessage(string userId, string roomName,string plainMessageText, string mainMessage)
+        public async Task<ResponseDto<RoomMessages>> AddMessage(string userId, string roomName, string plainMessageText, string mainMessage)
         {
             var response = new ResponseDto<RoomMessages>();
             try
@@ -343,7 +385,7 @@ namespace Austistic.Infrastructure.Service.Implementation
                     RoomId = room.Id
                 };
 
-              await _context.RoomMessages.AddAsync(msgRequest);
+                await _context.RoomMessages.AddAsync(msgRequest);
                 await _context.SaveChangesAsync();
                 response.StatusCode = StatusCodes.Status200OK;
                 response.DisplayMessage = "Success";
@@ -359,6 +401,49 @@ namespace Austistic.Infrastructure.Service.Implementation
                 return response;
             }
 
+        }
+
+        public async Task<ResponseDto<int>> GetUnreadMessageCount(string userId)
+        {
+            var response = new ResponseDto<int>();
+            try
+            {
+                // Get all rooms that user belongs to
+                var userRoomIds = await _context.Rooms
+                    .Where(r => r.Friend.UserId == userId || r.Friend.FriendUserId == userId)
+                    .Select(r => r.Id)
+                    .ToListAsync();
+
+                if (!userRoomIds.Any())
+                {
+                    response.DisplayMessage = "Success";
+                    response.Result = 0;
+                    response.StatusCode = 200;
+                    return response;
+
+                }
+
+                // Count unread messages inside those rooms
+                var unreadCount = await _context.RoomMessages
+                    .Include(m => m.ReadCount)
+                    .Where(m => userRoomIds.Contains(m.RoomId) &&
+                                m.SentById != userId &&             // exclude self-sent
+                                !m.ReadCount.Any(rc => rc.UserId == userId)) // not yet read
+                    .CountAsync();
+                response.DisplayMessage = "Success";
+                response.Result = unreadCount;
+                response.StatusCode = 200;
+                return response;
+
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error while fetching unread message count for user {UserId}", userId);
+                response.DisplayMessage = "Error";
+                response.ErrorMessages = new List<string>() { "Error while fetching unread message count for user" };
+                response.StatusCode = 400;
+                return response;
+            }
         }
 
         public async Task<ResponseDto<string>> ApproveFriendRequest(string friend_requestId, FriendStatus friendStatus)
@@ -419,11 +504,11 @@ namespace Austistic.Infrastructure.Service.Implementation
                     return response;
                 }
                 var friendRoom = await _context.Rooms.FirstOrDefaultAsync(u => u.FriendId == friend_requestId);
-                if(friendRoom != null)
+                if (friendRoom != null)
                 {
                     _context.Rooms.Remove(friendRoom);
                 }
-               
+
                 _context.Friends.Remove(friendRequest);
                 _context.SaveChanges();
                 response.StatusCode = StatusCodes.Status200OK;

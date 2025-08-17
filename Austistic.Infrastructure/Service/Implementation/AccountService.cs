@@ -336,13 +336,52 @@ namespace Austistic.Infrastructure.Service.Implementation
                     Age= fetchUser.Age,
                     Created = fetchUser.Created,
                     Gender = fetchUser.Gender,
-
+                    ShouldShowOnSearch = fetchUser.ShouldShowOnSearch,
+                   
                 };
 
 
                 response.StatusCode = StatusCodes.Status200OK;
                 response.DisplayMessage = "Success";
                 response.Result = result;
+                return response;
+
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message, ex);
+                response.ErrorMessages = new List<string>() { "Error in getting user info" };
+                response.StatusCode = 501;
+                response.DisplayMessage = "Error";
+                return response;
+            }
+        }
+        public async Task<ResponseDto<string>> ToggleUserShouldShow(string userId)
+        {
+            var response = new ResponseDto<string>();
+            try
+            {
+                var fetchUser = await _accountRepo.FindUserByIdAsync(userId);
+                if (fetchUser == null)
+                {
+                    response.ErrorMessages = new List<string>() { "Invalid user" };
+                    response.DisplayMessage = "Error";
+                    response.StatusCode = 400;
+                    return response;
+                }
+                var changeState = !fetchUser.ShouldShowOnSearch;
+                fetchUser.ShouldShowOnSearch = changeState;
+                var updateUserDetails = await _accountRepo.UpdateUserInfo(fetchUser);
+                if (updateUserDetails == false)
+                {
+                    response.ErrorMessages = new List<string>() { "Error in updating user search state" };
+                    response.StatusCode = StatusCodes.Status501NotImplemented;
+                    response.DisplayMessage = "Error";
+                    return response;
+                }
+                response.StatusCode = StatusCodes.Status200OK;
+                response.DisplayMessage = "Success";
+                response.Result = $"Search state toggle to {changeState} successfully";
                 return response;
 
             }

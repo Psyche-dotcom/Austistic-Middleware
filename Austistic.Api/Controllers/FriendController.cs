@@ -57,6 +57,25 @@ namespace Austistic.Api.Controllers
             }
         }
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [HttpGet("message/count")]
+        public async Task<IActionResult> GetUnreadMessageCount()
+        {
+            var userid = User.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Jti)?.Value;
+            var result = await _friendService.GetUnreadMessageCount(userid);
+            if (result.StatusCode == 200)
+            {
+                return Ok(result);
+            }
+            else if (result.StatusCode == 404)
+            {
+                return NotFound(result);
+            }
+            else
+            {
+                return BadRequest(result);
+            }
+        }
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpGet("active/current")]
         public async Task<IActionResult> GetActiveFriends()
         {
