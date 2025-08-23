@@ -728,7 +728,7 @@ namespace Austistic.Infrastructure.Service.Implementation
                     return response;
                 }
                 findUser.EncToken = _helper.Encrypt(token);
-              
+                findUser.IsTokenCreated = true;
                 var updateUserDetails = await _accountRepo.UpdateUserInfo(findUser);
                 if (updateUserDetails == false)
                 {

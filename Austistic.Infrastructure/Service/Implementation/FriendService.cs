@@ -44,9 +44,10 @@ namespace Austistic.Infrastructure.Service.Implementation
                 int maxAge = user.Age + 10;
                 if (!string.IsNullOrEmpty(filter))
                 {
-                    var Friendusers = await _context.Users.Where(u => (u.FirstName.Contains(filter)
-                    || u.LastName.Contains(filter)
-                    || u.UserName.Contains(filter)) && u.ShouldShowOnSearch)
+                    filter = filter.ToLower();
+                    var Friendusers = await _context.Users.Where(u => (u.FirstName.ToLower().Contains(filter)
+                    || u.LastName.ToLower().Contains(filter)
+                    || u.UserName.ToLower().Contains(filter)) && u.ShouldShowOnSearch)
                         .Select(u => new UserInfo
                         {
                             Id = u.Id,
@@ -226,7 +227,7 @@ namespace Austistic.Infrastructure.Service.Implementation
                     imageUrl = m.Message,
                     isMe = userId == m.SentById,
                     text = m.DisplayMessage,
-                    time = m.Created.ToShortTimeString(),
+                    time = m.Created.ToString(),
                     status = m.SentById == userId || m.ReadCount.Any(rc => rc.UserId == userId) ? "Read" : "UnRead"
                 }).ToList();
 
@@ -274,9 +275,10 @@ namespace Austistic.Infrastructure.Service.Implementation
                            });
                            if (!filter.IsNullOrEmpty())
                     {
-                        friends= friends.Where(u => (u.FirstName.Contains(filter)
-                    || u.LastName.Contains(filter)
-                    || u.UserName.Contains(filter)));
+                        filter = filter.ToLower();
+                        friends= friends.Where(u => (u.FirstName.ToLower().Contains(filter)
+                    || u.LastName.ToLower().Contains(filter)
+                    || u.UserName.ToLower().Contains(filter)));
                     }
 
                     response.StatusCode = StatusCodes.Status200OK;
@@ -306,9 +308,10 @@ namespace Austistic.Infrastructure.Service.Implementation
                            });
                 if (!filter.IsNullOrEmpty())
                 {
-                    friendReq = friendReq.Where(u => (u.FirstName.Contains(filter)
-                || u.LastName.Contains(filter)
-                || u.UserName.Contains(filter)));
+                    filter = filter.ToLower();
+                    friendReq = friendReq.Where(u => (u.FirstName.ToLower().Contains(filter)
+                || u.LastName.ToLower().Contains(filter)
+                || u.UserName.ToLower().Contains(filter)));
                 }
 
 
