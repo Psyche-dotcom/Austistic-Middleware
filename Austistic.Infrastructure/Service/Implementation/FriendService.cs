@@ -163,7 +163,7 @@ namespace Austistic.Infrastructure.Service.Implementation
                         UserId = f.UserId == userId ? f.FriendUser.Id : f.User.Id,
                         name = f.UserId == userId ? f.FriendUser.FirstName + " " + f.FriendUser.LastName : f.User.FirstName + " " + f.User.LastName,
                         message = f.Room.Messages.OrderByDescending(u => u.Created).FirstOrDefault().DisplayMessage,
-                        time = f.Room.Messages.OrderByDescending(u => u.Created).FirstOrDefault().Created.ToShortTimeString(),
+                        time = f.Room.Messages.OrderByDescending(u => u.Created).FirstOrDefault().Created.ToString(),
                         unreadCount = f.Room.Messages.Count(msg => msg.SentById != userId && !msg.ReadCount.Any(read => read.UserId == userId)),
                         url = f.UserId == userId ? f.FriendUser.ProfilePicture : f.User.ProfilePicture,
 
