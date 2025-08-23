@@ -707,6 +707,42 @@ namespace Austistic.Infrastructure.Service.Implementation
                 return response;
             }
         }
+        public async Task<ResponseDto<string>> UpdateAppUser(string id, UpdateUserDto updateUser)
+        {
+            var response = new ResponseDto<string>();
+            try
+            {
+                var findUser = await _accountRepo.FindUserByIdAsync(id);
+                if (findUser == null)
+                {
+                    response.ErrorMessages = new List<string>() { "There is no user with the id provided" };
+                    response.StatusCode = 404;
+                    response.DisplayMessage = "Error";
+                    return response;
+                }
+                var mapUpdateDetails = _mapper.Map(updateUser, findUser);
+                var updateUserDetails = await _accountRepo.UpdateUserInfo(mapUpdateDetails);
+                if (updateUserDetails == false)
+                {
+                    response.ErrorMessages = new List<string>() { "Error in updating user info" };
+                    response.StatusCode = StatusCodes.Status501NotImplemented;
+                    response.DisplayMessage = "Error";
+                    return response;
+                }
+                response.StatusCode = StatusCodes.Status200OK;
+                response.DisplayMessage = "Success";
+                response.Result = "Successfully update user information";
+                return response;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message, ex);
+                response.ErrorMessages = new List<string>() { "Error in updating user info" };
+                response.StatusCode = 500;
+                response.DisplayMessage = "Error";
+                return response;
+            }
+        }
         public async Task<ResponseDto<string>> CreateToken(string userid,string token)
         {
             var response = new ResponseDto<string>();

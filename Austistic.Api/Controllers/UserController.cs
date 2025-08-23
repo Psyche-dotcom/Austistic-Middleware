@@ -244,6 +244,25 @@ namespace Austistic.Api.Controllers
                 return BadRequest(result);
             }
         }
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [HttpPost("user/app/update_details")]
+        public async Task<IActionResult> UpdateAppUserInfo(UpdateUserDto updateUser)
+        {
+            var userid = User.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Jti)?.Value;
+            var result = await _accountService.UpdateAppUser(userid, updateUser);
+            if (result.StatusCode == 200)
+            {
+                return Ok(result);
+            }
+            else if (result.StatusCode == 404)
+            {
+                return NotFound(result);
+            }
+            else
+            {
+                return BadRequest(result);
+            }
+        }
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPost("admin/suspend_user/{email}")]

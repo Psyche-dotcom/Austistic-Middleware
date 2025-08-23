@@ -9,6 +9,7 @@ namespace AlpaStock.Infrastructure.Service.Interface
 {
     public interface IAccountService
     {
+        Task<ResponseDto<string>> UpdateAppUser(string id, UpdateUserDto updateUser);
         Task<ResponseDto<string>> CreateToken(string userid, string token);
         Task<ResponseDto<string>> ValidateToken(string userid, string token);
         Task<ResponseDto<string>> ToggleUserShouldShow(string userId);
