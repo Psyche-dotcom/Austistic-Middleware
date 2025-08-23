@@ -6,6 +6,7 @@ using Austistic.Core.DTOs.Request.Notification;
 using Austistic.Core.DTOs.Response.Auth;
 using Austistic.Core.Entities;
 using Austistic.Core.Repositories.Interface;
+using Austistic.Infrastructure.Service.Interface;
 using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -22,6 +23,7 @@ namespace Austistic.Infrastructure.Service.Implementation
         private readonly IAutisticRepository<ForgetPasswordToken> _forgetPasswordTokenRepo;
         private readonly IMapper _mapper;
         private readonly ICloudinaryService _cloudinaryService;
+        private readonly IHelper _helper;
         private readonly ILogger<AccountService> _logger;
         private readonly IGenerateJwt _generateJwt;
 
@@ -31,7 +33,7 @@ namespace Austistic.Infrastructure.Service.Implementation
             IEmailServices emailServices,
             IAutisticRepository<ForgetPasswordToken> forgetPasswordTokenRepo,
             IMapper mapper,
-            ICloudinaryService cloudinaryService)
+            ICloudinaryService cloudinaryService,IHelper helper)
         {
             _accountRepo = accountRepo;
             _logger = logger;
@@ -40,6 +42,7 @@ namespace Austistic.Infrastructure.Service.Implementation
             _forgetPasswordTokenRepo = forgetPasswordTokenRepo;
             _mapper = mapper;
             _cloudinaryService = cloudinaryService;
+            _helper = helper;
         }
 
 
@@ -337,6 +340,7 @@ namespace Austistic.Infrastructure.Service.Implementation
                     Created = fetchUser.Created,
                     Gender = fetchUser.Gender,
                     ShouldShowOnSearch = fetchUser.ShouldShowOnSearch,
+                    IsTokenCreated = fetchUser.IsTokenCreated,
                    
                 };
 
@@ -698,6 +702,94 @@ namespace Austistic.Infrastructure.Service.Implementation
             {
                 _logger.LogError(ex.Message, ex);
                 response.ErrorMessages = new List<string>() { "Error in updating user info" };
+                response.StatusCode = 500;
+                response.DisplayMessage = "Error";
+                return response;
+            }
+        }
+        public async Task<ResponseDto<string>> CreateToken(string userid,string token)
+        {
+            var response = new ResponseDto<string>();
+            try
+            {
+                var findUser = await _accountRepo.FindUserByIdAsync(userid);
+                if (findUser == null)
+                {
+                    response.ErrorMessages = new List<string>() { "There is no user with the id provided" };
+                    response.StatusCode = 404;
+                    response.DisplayMessage = "Error";
+                    return response;
+                }
+                if (findUser.IsTokenCreated)
+                {
+                    response.ErrorMessages = new List<string>() { "Token already created for user" };
+                    response.StatusCode = 400;
+                    response.DisplayMessage = "Error";
+                    return response;
+                }
+                findUser.EncToken = _helper.Encrypt(token);
+              
+                var updateUserDetails = await _accountRepo.UpdateUserInfo(findUser);
+                if (updateUserDetails == false)
+                {
+                    response.ErrorMessages = new List<string>() { "Error in creating token for user" };
+                    response.StatusCode = StatusCodes.Status501NotImplemented;
+                    response.DisplayMessage = "Error";
+                    return response;
+                }
+                response.StatusCode = StatusCodes.Status200OK;
+                response.DisplayMessage = "Success";
+                response.Result = "Successfully create token for user";
+                return response;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message, ex);
+                response.ErrorMessages = new List<string>() { "Error in creating user token" };
+                response.StatusCode = 500;
+                response.DisplayMessage = "Error";
+                return response;
+            }
+        }
+        public async Task<ResponseDto<string>> ValidateToken(string userid,string token)
+        {
+            var response = new ResponseDto<string>();
+            try
+            {
+                var findUser = await _accountRepo.FindUserByIdAsync(userid);
+                if (findUser == null)
+                {
+                    response.ErrorMessages = new List<string>() { "There is no user with the id provided" };
+                    response.StatusCode = 404;
+                    response.DisplayMessage = "Error";
+                    return response;
+                }
+                if (!findUser.IsTokenCreated)
+                {
+                    response.ErrorMessages = new List<string>() { "Token does not for this user" };
+                    response.StatusCode = 400;
+                    response.DisplayMessage = "Error";
+                    return response;
+                }
+                if(_helper.Decrypt(findUser.EncToken) != token)
+                {
+                    response.ErrorMessages = new List<string>() { "Invalid token for user" };
+                    response.StatusCode = StatusCodes.Status501NotImplemented;
+                    response.DisplayMessage = "Error";
+                    return response;
+                }
+                
+              
+              
+                response.StatusCode = StatusCodes.Status200OK;
+                response.DisplayMessage = "Success";
+                response.Result = "Successfully validate token for user";
+                return response;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message, ex);
+                response.ErrorMessages = new List<string>() { "Error in validating user token" };
                 response.StatusCode = 500;
                 response.DisplayMessage = "Error";
                 return response;
