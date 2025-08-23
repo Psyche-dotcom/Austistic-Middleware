@@ -8,9 +8,9 @@ namespace Austistic.Core.DTOs.Request.Auth
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public string Country { get; set; }
-        [Phone]
-        public string PhoneNumber { get; set; }
 
         public string UserName { get; set; }
+        public string Gender { get; set; }
+        public int Age { get; set; }
     }
 }
