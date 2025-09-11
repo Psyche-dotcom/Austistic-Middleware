@@ -26,6 +26,19 @@ namespace Austistic.Infrastructure.Service.Implementation
                 await Clients.All.SendAsync("UserOnline", userId);
             }
         }
+        public async Task DisconectUser(string userId)
+        {
+            if (!string.IsNullOrEmpty(userId))
+            {
+                _onlineUsers[userId] = Context.ConnectionId;
+
+                // Optionally mark user online in DB
+                await _friendService.ChangeOnlineStatus(userId,false);
+
+                // Notify everyone
+                await Clients.All.SendAsync("UserOffline", userId);
+            }
+        }
 
       
 
