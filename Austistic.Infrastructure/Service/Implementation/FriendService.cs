@@ -177,6 +177,17 @@ namespace Austistic.Infrastructure.Service.Implementation
                         time = f.Room.Messages.OrderByDescending(u => u.Created).FirstOrDefault().Created.ToString(),
                         unreadCount = f.Room.Messages.Count(msg => msg.SentById != userId && !msg.ReadCount.Any(read => read.UserId == userId)),
                         url = f.UserId == userId ? f.FriendUser.ProfilePicture : f.User.ProfilePicture,
+                        userStatus = f.UserId == userId
+                    ? (f.FriendUser.IsOnline
+                        ? "Online"
+                        : (!f.FriendUser.LastSeen.IsNullOrEmpty()
+                            ? $"Last seen {f.FriendUser.LastSeen}"
+                            : "Offline"))
+                    : (f.User.IsOnline
+                        ? "Online"
+                        : (!f.User.LastSeen.IsNullOrEmpty()
+                            ? $"Last seen {f.User.LastSeen}"
+                            : "Offline"))
 
                     }).ToListAsync();
 

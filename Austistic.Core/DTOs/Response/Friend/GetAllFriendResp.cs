@@ -15,6 +15,7 @@ namespace Austistic.Core.DTOs.Response.Friend
         public decimal unreadCount { get; set; }
         public string url { get; set; }
         public string time { get; set; }
+        public string userStatus { get; set; }
 
 
     }
