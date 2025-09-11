@@ -831,6 +831,123 @@ namespace Austistic.Infrastructure.Service.Implementation
                 return response;
             }
         }
+        public async Task<ResponseDto<string>> ResetSecurityToken(string userid,string token,string emailToken)
+        {
+            var response = new ResponseDto<string>();
+            try
+            {
+                var findUser = await _accountRepo.FindUserByIdAsync(userid);
+                if (findUser == null)
+                {
+                    response.ErrorMessages = new List<string>() { "There is no user with the id provided" };
+                    response.StatusCode = 404;
+                    response.DisplayMessage = "Error";
+                    return response;
+                }
+                if (!findUser.IsTokenCreated)
+                {
+                    response.ErrorMessages = new List<string>() { "Token does not for this user" };
+                    response.StatusCode = 400;
+                    response.DisplayMessage = "Error";
+                    return response;
+                }
+
+                var retrieveToken = await _forgetPasswordTokenRepo.GetQueryable().FirstOrDefaultAsync(u => u.userid == findUser.Id);
+                if (retrieveToken == null)
+                {
+                    response.ErrorMessages = new List<string>() { "invalid user token" };
+                    response.StatusCode = 404;
+                    response.DisplayMessage = "Error";
+                    return response;
+                }
+
+                if (retrieveToken.token != emailToken) {
+                    response.ErrorMessages = new List<string>() { "Invalid token" };
+                    response.DisplayMessage = "Error";
+                    response.StatusCode = 400;
+                    return response;
+                }
+              
+                _forgetPasswordTokenRepo.Delete(retrieveToken);
+                await _forgetPasswordTokenRepo.SaveChanges();
+                findUser.EncToken = _helper.Encrypt(token);
+                var updateUserDetails = await _accountRepo.UpdateUserInfo(findUser);
+                if (updateUserDetails == false)
+                {
+                    response.ErrorMessages = new List<string>() { "Error in updating user reset token" };
+                    response.StatusCode = StatusCodes.Status501NotImplemented;
+                    response.DisplayMessage = "Error";
+                    return response;
+                }
+
+
+
+                response.StatusCode = StatusCodes.Status200OK;
+                response.DisplayMessage = "Success";
+                response.Result = "Successfully reset token for user";
+                return response;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message, ex);
+                response.ErrorMessages = new List<string>() { "Error in reset user token" };
+                response.StatusCode = 500;
+                response.DisplayMessage = "Error";
+                return response;
+            }
+        }
+        public async Task<ResponseDto<string>> ForgotSecurityToken(string userid)
+        {
+            var response = new ResponseDto<string>();
+            try
+            {
+                var findUser = await _accountRepo.FindUserByIdAsync(userid);
+                if (findUser == null)
+                {
+                    response.ErrorMessages = new List<string>() { "There is no user with the id provided" };
+                    response.StatusCode = 404;
+                    response.DisplayMessage = "Error";
+                    return response;
+                }
+                if (!findUser.IsTokenCreated)
+                {
+                    response.ErrorMessages = new List<string>() { "Token does not for this user" };
+                    response.StatusCode = 400;
+                    response.DisplayMessage = "Error";
+                    return response;
+                }
+
+
+                var retrieveToken = await _forgetPasswordTokenRepo.GetQueryable().FirstOrDefaultAsync(u => u.userid == findUser.Id);
+                if (retrieveToken != null)
+                {
+                    _forgetPasswordTokenRepo.Delete(retrieveToken);
+                    await _forgetPasswordTokenRepo.SaveChanges();
+                }
+                var generateToken = _accountRepo.GenerateToken();
+                var savetoken = await _forgetPasswordTokenRepo.Add(new ForgetPasswordToken()
+                {
+                    token = generateToken.ToString(),
+                    gentoken = "reset security",
+                    userid = findUser.Id
+                });
+                await _forgetPasswordTokenRepo.SaveChanges();
+                var message = new Message(new string[] { findUser.Email }, "Reset Security Code", $"<p>Your reset security code is below<p><br/><h6>{generateToken}</h6><br/> <p>Please use it in your reset security page</p>");
+                _emailServices.SendEmail(message);
+                response.StatusCode = StatusCodes.Status200OK;
+                response.DisplayMessage = "Success";
+                response.Result = "Successfully sent token for user";
+                return response;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message, ex);
+                response.ErrorMessages = new List<string>() { "Error in sending user token" };
+                response.StatusCode = 500;
+                response.DisplayMessage = "Error";
+                return response;
+            }
+        }
 
         public async Task<ResponseDto<string>> UploadUserProfilePicture(string email, IFormFile file)
         {

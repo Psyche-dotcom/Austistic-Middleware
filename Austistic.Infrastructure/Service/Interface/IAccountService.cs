@@ -27,6 +27,8 @@ namespace AlpaStock.Infrastructure.Service.Interface
         Task<ResponseDto<string>> SuspendUserAsync(string useremail);
         Task<ResponseDto<string>> UnSuspendUserAsync(string useremail);
         Task<ResponseDto<string>> UpdateUserRole(string email, string role);
+        Task<ResponseDto<string>> ForgotSecurityToken(string userid);
+        Task<ResponseDto<string>> ResetSecurityToken(string userid, string token, string emailToken);
 
 
     }
