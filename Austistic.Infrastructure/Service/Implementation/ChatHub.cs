@@ -27,24 +27,7 @@ namespace Austistic.Infrastructure.Service.Implementation
             }
         }
 
-        public override async Task OnDisconnectedAsync(Exception exception)
-        {
-            // Find the userId linked to this connection
-            var userId = _onlineUsers.FirstOrDefault(x => x.Value == Context.ConnectionId).Key;
-
-            if (!string.IsNullOrEmpty(userId))
-            {
-                _onlineUsers.Remove(userId);
-
-              
-                await _friendService.ChangeOnlineStatus(userId, false);
-
-                
-                await Clients.All.SendAsync("UserOffline", userId);
-            }
-
-            await base.OnDisconnectedAsync(exception);
-        }
+      
 
         public async Task JoinRoom(string roomName)
         {
