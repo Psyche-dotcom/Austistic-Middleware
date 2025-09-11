@@ -16,6 +16,7 @@ namespace Austistic.Core.DTOs.Response.Auth
         public string PhoneNumber { get; set; }
         public string Country { get; set; }
         public string UserName { get; set; }
+        public string UserStatus { get; set; }
         public bool isSuspended { get; set; }
         public bool ShouldShowOnSearch { get; set; }
         public bool IsTokenCreated { get; set; }

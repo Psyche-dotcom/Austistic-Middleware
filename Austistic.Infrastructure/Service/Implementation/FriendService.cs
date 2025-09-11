@@ -131,6 +131,17 @@ namespace Austistic.Infrastructure.Service.Implementation
                         ProfilePicture = f.UserId == userId ? f.FriendUser.ProfilePicture : f.User.ProfilePicture,
                         Age = f.UserId == userId ? f.FriendUser.Age : f.User.Age,
                         Gender = f.UserId == userId ? f.FriendUser.Gender : f.User.Gender,
+                        UserStatus = f.UserId == userId
+                    ? (f.FriendUser.IsOnline
+                        ? "Online"
+                        : (!f.FriendUser.LastSeen.IsNullOrEmpty()
+                            ? $"Last seen {f.FriendUser.LastSeen}"
+                            : "Offline"))
+                    : (f.User.IsOnline
+                        ? "Online"
+                        : (!f.User.LastSeen.IsNullOrEmpty() 
+                            ? $"Last seen {f.User.LastSeen}"
+                            : "Offline"))
                     })
                     .ToListAsync();
 
@@ -578,6 +589,49 @@ namespace Austistic.Infrastructure.Service.Implementation
                 return response;
             }
         }
+        public async Task<ResponseDto<string>> ChangeOnlineStatus(string userId, bool IsOnline)
+        {
+
+            var response = new ResponseDto<string>();
+            try
+            {
+                var User = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+
+                if (IsOnline)
+                {
+                    User.IsOnline = true;
+                    User.LastSeen = null;
+                }
+                else
+                {
+                    User.IsOnline = false;
+                    User.LastSeen = DateTime.UtcNow.ToString("d/M/yyyy h:mm tt");
+                }
+                _context.Users.Update(User);
+                await _context.SaveChangesAsync();
+
+                response.StatusCode = StatusCodes.Status200OK;
+                response.DisplayMessage = "Success";
+                response.Result = $"User status set to {IsOnline}";
+                return response;
+            }
+            catch (Exception ex)
+            {
+
+                _logger.LogError(ex.Message, ex);
+                response.ErrorMessages = new List<string>() { "Error in changing user status" };
+                response.StatusCode = 501;
+                response.DisplayMessage = "Error";
+                return response;
+            }
+        }
+
+
+
+
+
+
+
     }
 
 }

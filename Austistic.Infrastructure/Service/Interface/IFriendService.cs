@@ -18,5 +18,6 @@ namespace Austistic.Infrastructure.Service.Interface
         Task<ResponseDto<string>> DeleteFriendRequest(string friend_requestId);
         Task<ResponseDto<List<RoomMessageResp>>> GetRoomMessage(string userId, string RoomName);
         Task<ResponseDto<RoomMessages>> AddMessage(string userId, string roomName, string plainMessageText, string mainMessage);
+        Task<ResponseDto<string>> ChangeOnlineStatus(string userId, bool IsOnline);
     }
 }
