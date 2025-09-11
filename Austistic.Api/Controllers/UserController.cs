@@ -152,7 +152,7 @@ namespace Austistic.Api.Controllers
             }
         }
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        [HttpGet("user/validate/token")]
+        [HttpPost("user/validate/token")]
         public async Task<IActionResult> ValidateAuthToken(UserToken userToken)
         {
             var userid = User.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Jti)?.Value;
