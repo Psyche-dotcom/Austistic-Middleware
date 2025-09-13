@@ -244,7 +244,7 @@ namespace Austistic.Infrastructure.Service.Implementation
                 }
 
                 // Map to DTO
-                var retrieveMessages =  roomMessages.OrderBy(u=>u.Created)
+                var retrieveMessages =  roomMessages.OrderByDescending(u=>u.Created)
                     .Select(m => new RoomMessageResp
                 {
                     imageUrl = m.Message,
