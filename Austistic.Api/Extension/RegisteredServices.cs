@@ -23,6 +23,7 @@ namespace AlpaStock.Api.Extension
             services.AddScoped<ISymbolService, SymbolService>();
             services.AddScoped<ISupportService, SupportService>();
             services.AddScoped<IHelper, Helper>();
+            services.AddScoped<IApiClient, ApiClient>();
             services.AddScoped<IFriendService, FriendService>();
             services.AddAutoMapper(typeof(ProjectProfile));
             services.AddHttpClient();

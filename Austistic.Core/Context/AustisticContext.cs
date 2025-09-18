@@ -10,6 +10,7 @@ namespace AlpaStock.Core.Context
         public DbSet<ConfirmEmailToken> ConfirmEmailTokens { get; set; }
         public DbSet<ForgetPasswordToken> ForgetPasswordTokens { get; set; }
         public DbSet<SymbolImage> SymbolImage { get; set; }
+        public DbSet<UserSymbolAttachedProcess> UserSymbolAttachedProcess { get; set; }
         public DbSet<Friend> Friends { get; set; }
         public DbSet<CategorySymbol> CategorySymbol { get; set; }
         public DbSet<SupportTicket> SupportTicket { get; set; }

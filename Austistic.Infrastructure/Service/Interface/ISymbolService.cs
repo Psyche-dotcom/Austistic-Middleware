@@ -1,4 +1,5 @@
 ﻿using AlpaStock.Core.DTOs;
+using Austistic.Core.DTOs.Request;
 using Austistic.Core.DTOs.Response.symbol;
 using Austistic.Core.Entities;
 using Microsoft.AspNetCore.Http;
@@ -14,5 +15,7 @@ namespace Austistic.Infrastructure.Service.Interface
         Task<ResponseDto<List<Symbolresp>>> GetAllSymbolIncat(string catid);
         Task<ResponseDto<List<CategorySymbolDto>>> GetAllcat(string userid); 
         Task<ResponseDto<string>> DeleteCat(string catid);
+        Task<ResponseDto<BaseFreePikAPi>> PromptSymbol(string prompt, string userid);
+        Task<ResponseDto<string>> WebhookPromptSymbol(IconPreviewWebhookPayload payload);
     }
 }

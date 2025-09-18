@@ -1,4 +1,5 @@
-﻿using Austistic.Core.DTOs.Request.Symbol;
+﻿using Austistic.Core.DTOs.Request;
+using Austistic.Core.DTOs.Request.Symbol;
 using Austistic.Infrastructure.Service.Interface;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -24,6 +25,24 @@ namespace Austistic.Api.Controllers
         {
             var userid = User.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Jti)?.Value;
             var result = await _symbolService.CreateCatgory(userid, req.CategoryType, req.CategoryName);
+            if (result.StatusCode == 200)
+            {
+                return Ok(result);
+            }
+            else if (result.StatusCode == 404)
+            {
+                return NotFound(result);
+            }
+            else
+            {
+                return BadRequest(result);
+            }
+        }
+        [HttpGet("ai/prompt")]
+        public async Task<IActionResult> CreateSymbol(string prompt)
+        {
+            var userid = User.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Jti)?.Value;
+            var result = await _symbolService.PromptSymbol(prompt, userid);
             if (result.StatusCode == 200)
             {
                 return Ok(result);
@@ -110,7 +129,25 @@ namespace Austistic.Api.Controllers
             {
                 return BadRequest(result);
             }
-        } 
+        }
+         [AllowAnonymous]
+        [HttpPost("Freepik")]
+        public async Task<IActionResult> WebhookFreepik([FromBody] IconPreviewWebhookPayload payload)
+        {
+            var result = await _symbolService.WebhookPromptSymbol(payload);
+            if (result.StatusCode == 200)
+            {
+                return Ok(result);
+            }
+            else if (result.StatusCode == 404)
+            {
+                return NotFound(result);
+            }
+            else
+            {
+                return BadRequest(result);
+            }
+        }
         [HttpDelete("cat/delete/{id}")]
         public async Task<IActionResult> DeleteCat(string id)
         {
