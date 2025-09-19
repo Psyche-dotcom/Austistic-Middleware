@@ -512,7 +512,7 @@ namespace Austistic.Infrastructure.Service.Implementation
                var catid = string.Empty;
                 if (checkCategory == null)
                 {
-                    var createCategory = await CreateCatgory2(data.UserId, AustisticEnum.Owned.ToString(), "Personal");
+                    var createCategory = await CreateCatgory2(data.UserId, AustisticEnum.Owned.ToString(), "PersonalIcon");
                     if(createCategory.StatusCode == 200)
                     {
                         catid = createCategory.Result;
@@ -527,7 +527,7 @@ namespace Austistic.Infrastructure.Service.Implementation
                         Description = data.Description,
                         IsAIGenerated= true,
                         ImgUrl = url,
-                        SymbolIdentifier = _helper.GenerateSecureRandomAlphanumeric(10)
+                        SymbolIdentifier ="Ai_"+ _helper.GenerateSecureRandomAlphanumeric(10)
                     };
                     await _symbolImageRepo.Add(image);
                     await _symbolImageRepo.SaveChanges();

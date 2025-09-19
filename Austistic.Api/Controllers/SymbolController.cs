@@ -112,6 +112,25 @@ namespace Austistic.Api.Controllers
                 return BadRequest(result);
             }
         }
+        [AllowAnonymous]
+        [HttpGet("ai/image/{id}")]
+        public async Task<IActionResult> GetSymbolImageAiByte(string id)
+        {
+
+            var result = await _symbolService.GetSymbolImageByte(id);
+            if (result.StatusCode == 200)
+            {
+                return Ok(result.Result.ImgUrl);
+            }
+            else if (result.StatusCode == 404)
+            {
+                return NotFound(result);
+            }
+            else
+            {
+                return BadRequest(result);
+            }
+        }
         [HttpDelete("delete/{id}")]
         public async Task<IActionResult> DeleteSymbol(string id)
         {
