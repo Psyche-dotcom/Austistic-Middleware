@@ -120,7 +120,7 @@ namespace Austistic.Api.Controllers
             var result = await _symbolService.GetSymbolImageByte(id);
             if (result.StatusCode == 200)
             {
-                return Ok(result.Result.ImgUrl);
+                return Ok(result);
             }
             else if (result.StatusCode == 404)
             {
