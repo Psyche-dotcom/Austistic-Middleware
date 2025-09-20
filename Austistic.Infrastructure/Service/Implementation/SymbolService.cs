@@ -285,7 +285,9 @@ namespace Austistic.Infrastructure.Service.Implementation
                         Description = s.Description,
                         SymbolId = s.SymbolIdentifier,
                         Created = s.Created,
+                        contentType = s.ContentType,
                         Catid = s.CategorySymbolId
+                        
                     })
                     .ToListAsync();
 

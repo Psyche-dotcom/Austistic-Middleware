@@ -58,7 +58,7 @@ namespace Austistic.Api.Controllers
         }
         [AllowAnonymous]
         [HttpPost("category/retrieve_all_symbol")]
-        public async Task<IActionResult> CreateCategory(CatSymbol req)
+        public async Task<IActionResult> RetriveSymbolinCategory(CatSymbol req)
         {
 
             var result = await _symbolService.GetAllSymbolIncat(req.catid);
