@@ -391,7 +391,7 @@ namespace Austistic.Infrastructure.Service.Implementation
                     ContentType = file.ContentType,
                     ImageData = fileBytes,
                     Description = Description,
-                    SymbolIdentifier = _helper.GenerateSecureRandomAlphanumeric(10)
+                    SymbolIdentifier = file.ContentType == "image/png"?"pn_"+ _helper.GenerateSecureRandomAlphanumeric(10) : _helper.GenerateSecureRandomAlphanumeric(10)
                 };
                 await _symbolImageRepo.Add(image);
                 await _symbolImageRepo.SaveChanges();
