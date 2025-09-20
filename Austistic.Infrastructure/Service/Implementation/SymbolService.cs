@@ -517,7 +517,7 @@ namespace Austistic.Infrastructure.Service.Implementation
                var catid = string.Empty;
                 if (checkCategory == null)
                 {
-                    var createCategory = await CreateCatgory2(data.UserId, AustisticEnum.Owned.ToString(), "PersonalIcon");
+                    var createCategory = await CreateCatgory2(data.UserId, AustisticEnum.Owned.ToString(), "Personal Icon");
                     if(createCategory.StatusCode == 200)
                     {
                         catid = createCategory.Result;
