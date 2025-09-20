@@ -10,6 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+using System.Net.Http;
 
 namespace Austistic.Infrastructure.Service.Implementation
 {
@@ -21,16 +22,18 @@ namespace Austistic.Infrastructure.Service.Implementation
         private readonly ILogger<SymbolService> _logger;
         private readonly IHelper _helper;
         private readonly IAccountRepo _accountRepo;
+        private readonly IHttpClientFactory _httpClientFactory;
         private readonly IConfiguration _configuration;
         private readonly IApiClient _apiClient;
         public SymbolService(IAutisticRepository<SymbolImage> symbolImageRepo,
             IAutisticRepository<CategorySymbol> categorySymbolRepo,
-            IAccountRepo accountRepo,
+            IAccountRepo accountRepo, IHttpClientFactory httpClientFactory,
             ILogger<SymbolService> logger, IHelper helper, IConfiguration configuration, IApiClient apiClient, IAutisticRepository<UserSymbolAttachedProcess> userSymbolAttachedProcessRepo)
         {
             _symbolImageRepo = symbolImageRepo;
             _categorySymbolRepo = categorySymbolRepo;
             _accountRepo = accountRepo;
+            _httpClientFactory = httpClientFactory;
             _logger = logger;
             _helper = helper;
             _configuration = configuration;
@@ -420,7 +423,7 @@ namespace Austistic.Infrastructure.Service.Implementation
                     format = "png",
                     style = "solid",
                     webhook_url = _configuration["FREEPIK:WEBHOOK"],
-                    prompt = $"{prompt} colorful icon"
+                    prompt = $"{prompt} icon"
                 };
                 var dict = new Dictionary<string, string>();
                 dict.Add("x-freepik-api-key", _configuration["FREEPIK:APIKEY"]);
@@ -521,16 +524,35 @@ namespace Austistic.Infrastructure.Service.Implementation
                 catid = checkCategory.Id;
                 foreach (var url in payload.Generated)
                 {
-                    var image = new SymbolImage
+                    var client = _httpClientFactory.CreateClient();
+                    using var httpRequest = new HttpRequestMessage(HttpMethod.Get, url);
+                    using var httpResponse = await client.SendAsync(httpRequest, HttpCompletionOption.ResponseHeadersRead);
+                    if (httpResponse.IsSuccessStatusCode)
                     {
-                        CategorySymbolId = catid,
-                        Description = data.Description,
-                        IsAIGenerated= true,
-                        ImgUrl = url,
-                        SymbolIdentifier ="Ai_"+ _helper.GenerateSecureRandomAlphanumeric(10)
-                    };
-                    await _symbolImageRepo.Add(image);
-                    await _symbolImageRepo.SaveChanges();
+                        var content = httpResponse.Content;
+                        var contentType = content.Headers.ContentType?.MediaType ?? "application/octet-stream";
+                        var imageBytes = await content.ReadAsByteArrayAsync();
+
+                        // create and save symbol image with image bytes
+                        var imageData = new SymbolImage
+                        {
+                            CategorySymbolId = catid,
+                            Description = data.Description,
+                            IsAIGenerated = true,
+                            ImgUrl = url,
+                            SymbolIdentifier = "Ai_" + _helper.GenerateSecureRandomAlphanumeric(10),
+                            ImageData = imageBytes,
+                            ContentType = contentType, 
+                            FileName = data.Description+".png"
+                        };
+                        await _symbolImageRepo.Add(imageData);
+                        await _symbolImageRepo.SaveChanges();
+                    
+                    }
+
+
+
+                    
                 }
                
                 response.DisplayMessage = "Success";
