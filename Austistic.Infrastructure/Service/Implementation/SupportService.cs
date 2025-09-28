@@ -171,7 +171,8 @@ namespace Austistic.Infrastructure.Service.Implementation
             try
             {
                 var checkTicket = await _supportTicketRepo.GetQueryable()
-                    .Include(u => u.SupportMessages).
+                    .Include(u => u.SupportMessages)
+                    .Include(u=> u.User).
                     Where(u => u.Status == "Open").ToListAsync();
 
                 await _supportTicketRepo.SaveChanges();
