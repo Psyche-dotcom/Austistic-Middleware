@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 using System.Net.Http;
 
@@ -471,6 +472,66 @@ namespace Austistic.Infrastructure.Service.Implementation
                 return response;
             }
         }
+        public async Task<ResponseDto<BaseFreePikAPi>> PromptSymbolAdminCat(string prompt, 
+            string userid, string catid)
+        {
+            var response = new ResponseDto<BaseFreePikAPi>();
+            try
+            {
+
+                var apiUrl = _configuration["FREEPIK:BASEURL"] + $"v1/ai/text-to-icon";
+                var req = new
+                {
+                    format = "png",
+                    style = "solid",
+                    webhook_url = _configuration["FREEPIK:WEBHOOK"],
+                    prompt = $"{prompt} icon"
+                };
+                var dict = new Dictionary<string, string>();
+                dict.Add("x-freepik-api-key", _configuration["FREEPIK:APIKEY"]);
+                var makeRequest = await _apiClient.PostAsync<string>(apiUrl, req, dict);
+                if (!makeRequest.IsSuccessful)
+                {
+                    _logger.LogError("Prompt icon mess", makeRequest.ErrorMessage);
+                    _logger.LogError("Prompt icon error ex", makeRequest.ErrorException);
+                    _logger.LogError("Prompt icon error con", makeRequest.Content);
+                    response.StatusCode = 400;
+                    response.DisplayMessage = "Error";
+                    response.ErrorMessages = new List<string>() { "Unable to generate icon" };
+                    return response;
+                }
+                var result = JsonConvert.DeserializeObject<BaseFreePikAPi>(makeRequest.Content);
+                if (result == null)
+                {
+                    response.StatusCode = 400;
+                    response.DisplayMessage = "Error";
+                    response.ErrorMessages = new List<string>() { "Generated icon task id is empty" };
+                    return response;
+                }
+                await _userSymbolAttachedProcessRepo.Add(new UserSymbolAttachedProcess()
+                {
+                    Status = result.data.status,
+                    TaskId = result.data.task_id,
+                    UserId = userid,
+                    Description = prompt,
+                    CatId = catid,
+                });
+                await _userSymbolAttachedProcessRepo.SaveChanges();
+                response.StatusCode = 200;
+                response.DisplayMessage = "Success";
+                response.Result = result;
+                return response;
+
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"unable to generate icon ex - {ex.Message}", ex);
+                response.ErrorMessages = new List<string> { "Unable to generate icon at the moment" };
+                response.StatusCode = 500;
+                response.DisplayMessage = "Error";
+                return response;
+            }
+        }
         public async Task<ResponseDto<string>> WebhookPromptSymbol(IconPreviewWebhookPayload payload)
         {
             var response = new ResponseDto<string>();
@@ -511,19 +572,28 @@ namespace Austistic.Infrastructure.Service.Implementation
                     response.Result = $"Image generated is in {payload.Status}";
                     return response;
                 }
-                var checkCategory = await _categorySymbolRepo
-                   .GetQueryable().FirstOrDefaultAsync(u => u.UserId == data.UserId
-                   && u.CategoryType == AustisticEnum.Owned.ToString());
-               var catid = string.Empty;
-                if (checkCategory == null)
+                var catid = string.Empty;
+                if (!data.CatId.IsNullOrEmpty())
                 {
-                    var createCategory = await CreateCatgory2(data.UserId, AustisticEnum.Owned.ToString(), "Personal Icon");
-                    if(createCategory.StatusCode == 200)
-                    {
-                        catid = createCategory.Result;
-                    }
+                    catid = data.CatId;
                 }
-                catid = checkCategory.Id;
+                else
+                {
+                    var checkCategory = await _categorySymbolRepo
+                       .GetQueryable().FirstOrDefaultAsync(u => u.UserId == data.UserId
+                       && u.CategoryType == AustisticEnum.Owned.ToString());
+                    
+                    if (checkCategory == null)
+                    {
+                        var createCategory = await CreateCatgory2(data.UserId, AustisticEnum.Owned.ToString(), "Personal Icon");
+                        if (createCategory.StatusCode == 200)
+                        {
+                            catid = createCategory.Result;
+                        }
+                    }
+                    catid = checkCategory.Id;
+                }
+                    
                 foreach (var url in payload.Generated)
                 {
                     var client = _httpClientFactory.CreateClient();

@@ -11,6 +11,7 @@ namespace Austistic.Core.Entities
         public string TaskId { get; set; }
         public string UserId { get; set; } 
         public string Description { get; set; } 
+        public string? CatId { get; set; } 
         public string Status { get; set; } 
     }
 }
