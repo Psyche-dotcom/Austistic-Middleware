@@ -39,10 +39,28 @@ namespace Austistic.Api.Controllers
             }
         }
         [HttpGet("ai/prompt")]
-        public async Task<IActionResult> CreateSymbol(string prompt)
+        public async Task<IActionResult> AICreateSymbol(string prompt)
         {
             var userid = User.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Jti)?.Value;
             var result = await _symbolService.PromptSymbol(prompt, userid);
+            if (result.StatusCode == 200)
+            {
+                return Ok(result);
+            }
+            else if (result.StatusCode == 404)
+            {
+                return NotFound(result);
+            }
+            else
+            {
+                return BadRequest(result);
+            }
+        }
+        [HttpGet("admin/ai/prompt")]
+        public async Task<IActionResult> AdminAiCreateSymbol(string prompt,string catid)
+        {
+            var userid = User.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Jti)?.Value;
+            var result = await _symbolService.PromptSymbolAdminCat(prompt, userid,catid);
             if (result.StatusCode == 200)
             {
                 return Ok(result);

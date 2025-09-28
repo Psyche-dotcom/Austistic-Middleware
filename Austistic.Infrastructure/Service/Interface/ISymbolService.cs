@@ -8,6 +8,8 @@ namespace Austistic.Infrastructure.Service.Interface
 {
     public interface ISymbolService
     {
+        Task<ResponseDto<BaseFreePikAPi>> PromptSymbolAdminCat(string prompt,
+            string userid, string catid);
         Task<ResponseDto<string>> CreateCatgory(string userid, string CatType, string CategoryName);
         Task<ResponseDto<SymbolImage>> GetSymbolImageByte(string SymbolIdentifier);
         Task<ResponseDto<string>> UploadSymbolCategory(string CategoryName, IFormFile file, string Description);
