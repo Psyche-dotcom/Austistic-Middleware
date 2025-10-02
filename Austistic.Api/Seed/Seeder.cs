@@ -11,10 +11,10 @@ namespace Austistic.Api.Seed
         {
             var dbContext = app.ApplicationServices.CreateScope().ServiceProvider.GetRequiredService<AustisticContext>();
 
-            if (dbContext.Database.GetPendingMigrations().Any())
+           /* if (dbContext.Database.GetPendingMigrations().Any())
             {
                 dbContext.Database.Migrate();
-            }
+            }*/
 
             if (!dbContext.Roles.Any())
             {
@@ -32,14 +32,16 @@ namespace Austistic.Api.Seed
                 var userManager = app.ApplicationServices.CreateScope().ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
                 var user = new ApplicationUser()
                 {
-                    Email = "Bsaheed79@gmail.com",
+                    Email = "celeste@314academy.org",
                     EmailConfirmed = true,
-                    Country = "NIgeria",
-                    PhoneNumber = "08160250471",
-                    FirstName = "Saheed",
-                    LastName = "Babatunde",
-                    UserName = "Psyche"
+                    Country = "USA",
+                    PhoneNumber = "703-220-0630",
+                    FirstName = "Celeste",
+                    LastName = "Chamberlain",
+                    UserName = "celestec",
+                    Gender="Male"
                 };
+
                 await userManager.CreateAsync(user, "String11@");
                 await userManager.AddToRoleAsync(user, "SuperAdmin");
             }
