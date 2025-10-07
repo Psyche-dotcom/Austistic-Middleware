@@ -455,6 +455,7 @@ namespace Austistic.Infrastructure.Service.Implementation
                     TaskId = result.data.task_id,
                     UserId = userid,
                     Description = prompt,
+                    CatId= null,
                 });
                 await _userSymbolAttachedProcessRepo.SaveChanges();
                 response.StatusCode = 200;
